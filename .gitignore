@@ -1,0 +1,14 @@
+# Dependencies
+node_modules/
+
+# Production builds
+dist/
+
+# Test exports & logs
+sample-assets/Exported-Test/
+*.log
+npm-debug.log*
+
+# OS Files
+.DS_Store
+Thumbs.db
