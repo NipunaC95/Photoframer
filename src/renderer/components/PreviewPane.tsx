@@ -118,21 +118,21 @@ export const PreviewPane: React.FC<PreviewPaneProps> = ({
     if (diffW > 0 && diffH === 0) {
       return {
         type: 'Pillarbox',
-        amount: `+${diffW}px width padding`,
-        badgeClass: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20',
+        amount: `+${diffW}px width`,
+        badgeClass: 'bg-[var(--chip-surface)] text-[var(--text-secondary)] border-[var(--border-subtle)]',
       };
     }
     if (diffH > 0 && diffW === 0) {
       return {
         type: 'Letterbox',
-        amount: `+${diffH}px height padding`,
-        badgeClass: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+        amount: `+${diffH}px height`,
+        badgeClass: 'bg-[var(--chip-surface)] text-[var(--text-secondary)] border-[var(--border-subtle)]',
       };
     }
     return {
-      type: 'Exact Ratio',
-      amount: 'No padding needed',
-      badgeClass: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
+      type: '1:1 Match',
+      amount: 'No padding',
+      badgeClass: 'bg-[var(--peak)]/10 text-[var(--peak)] border-[var(--peak)]/20',
     };
   };
 
@@ -144,20 +144,20 @@ export const PreviewPane: React.FC<PreviewPaneProps> = ({
       <div className="h-11 border-b border-[var(--border-subtle)] bg-[var(--bg-panel)] px-4 flex items-center justify-between z-10">
         <div className="flex items-center space-x-3 text-xs">
           <div className="flex items-center space-x-1.5 text-[var(--text-secondary)]">
-            <span className="font-semibold text-[var(--text-primary)]">
-              {selectedItem ? selectedItem.fileName : 'No file selected'}
+            <span className="font-semibold tracking-tight text-[var(--text-primary)]">
+              {selectedItem ? selectedItem.fileName : 'No photo selected'}
             </span>
           </div>
 
           {dimensions && (
             <>
               <span className="text-[var(--text-muted)]">•</span>
-              <div className="flex items-center space-x-1.5 text-xs font-mono">
-                <span className="text-gray-400">
+              <div className="flex items-center space-x-1.5 text-xs font-mono tabular-nums">
+                <span className="text-[var(--text-muted)]">
                   {formatDimensions(selectedItem!.width, selectedItem!.height)}
                 </span>
                 <ArrowRight className="w-3 h-3 text-[var(--text-muted)]" />
-                <span className="text-cyan-400 font-semibold">
+                <span className="text-[var(--text-primary)] font-semibold">
                   {formatDimensions(dimensions.canvasWidth, dimensions.canvasHeight)}
                 </span>
               </div>
@@ -166,7 +166,7 @@ export const PreviewPane: React.FC<PreviewPaneProps> = ({
 
           {paddingInfo && (
             <span
-              className={`text-[10px] font-mono px-2 py-0.5 rounded border ${paddingInfo.badgeClass}`}
+              className={`text-[9px] font-mono tracking-wider uppercase px-2 py-0.5 rounded-full border ${paddingInfo.badgeClass}`}
             >
               {paddingInfo.type} ({paddingInfo.amount})
             </span>
@@ -174,59 +174,60 @@ export const PreviewPane: React.FC<PreviewPaneProps> = ({
         </div>
 
         {/* View Controls */}
-        <div className="flex items-center space-x-1.5">
+        <div className="flex items-center space-x-2">
           {selectedItem && (
             <button
               onMouseDown={() => setIsShowingOriginal(true)}
               onMouseUp={() => setIsShowingOriginal(false)}
               onMouseLeave={() => setIsShowingOriginal(false)}
               title="Hold to preview original unpadded image"
-              className={`flex items-center space-x-1 px-2.5 py-1 rounded text-xs transition-colors border ${
+              className={`flex items-center space-x-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition-all border ${
                 isShowingOriginal
-                  ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
-                  : 'bg-[var(--bg-card)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border-[var(--border-subtle)]'
+                  ? 'bg-[var(--brand-accent)] text-[var(--bg-base)] border-transparent'
+                  : 'bg-[var(--chip-surface)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-strong)] border-[var(--border-subtle)]'
               }`}
             >
               {isShowingOriginal ? (
                 <>
-                  <EyeOff className="w-3 h-3 text-amber-400" />
+                  <EyeOff className="w-3 h-3" />
                   <span>Original (Holding)</span>
                 </>
               ) : (
                 <>
-                  <Eye className="w-3 h-3" />
+                  <Eye className="w-3 h-3 text-[var(--text-muted)]" />
                   <span>Hold for Original</span>
                 </>
               )}
             </button>
           )}
 
-          <div className="h-4 w-px bg-[var(--border-subtle)] mx-1" />
-
-          <button
-            onClick={() => setZoomLevel((z) => Math.max(0.25, z - 0.25))}
-            title="Zoom out"
-            className="p-1.5 rounded hover:bg-[var(--bg-card)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
-          >
-            <ZoomOut className="w-3.5 h-3.5" />
-          </button>
-          <span className="text-[11px] font-mono text-[var(--text-muted)] w-10 text-center">
-            {Math.round(zoomLevel * 100)}%
-          </span>
-          <button
-            onClick={() => setZoomLevel((z) => Math.min(3, z + 0.25))}
-            title="Zoom in"
-            className="p-1.5 rounded hover:bg-[var(--bg-card)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
-          >
-            <ZoomIn className="w-3.5 h-3.5" />
-          </button>
-          <button
-            onClick={() => setZoomLevel(1)}
-            title="Reset fit"
-            className="p-1.5 rounded hover:bg-[var(--bg-card)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
-          >
-            <Maximize className="w-3.5 h-3.5" />
-          </button>
+          {/* Zoom Group */}
+          <div className="flex items-center rounded-lg bg-[var(--chip-surface)] border border-[var(--border-subtle)] p-0.5">
+            <button
+              onClick={() => setZoomLevel((z) => Math.max(0.25, z - 0.25))}
+              title="Zoom out"
+              className="p-1 rounded hover:bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+            >
+              <ZoomOut className="w-3.5 h-3.5" />
+            </button>
+            <span className="text-[11px] font-mono tabular-nums text-[var(--text-muted)] w-10 text-center">
+              {Math.round(zoomLevel * 100)}%
+            </span>
+            <button
+              onClick={() => setZoomLevel((z) => Math.min(3, z + 0.25))}
+              title="Zoom in"
+              className="p-1 rounded hover:bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+            >
+              <ZoomIn className="w-3.5 h-3.5" />
+            </button>
+            <button
+              onClick={() => setZoomLevel(1)}
+              title="Reset fit"
+              className="p-1 rounded hover:bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors ml-0.5 border-l border-[var(--border-subtle)] pl-1"
+            >
+              <Maximize className="w-3 h-3" />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -240,14 +241,31 @@ export const PreviewPane: React.FC<PreviewPaneProps> = ({
             style={{
               transform: `scale(${zoomLevel})`,
               transformOrigin: 'center center',
-              transition: 'transform 0.15s ease-out',
+              transition: 'transform 0.15s cubic-bezier(0.16, 1, 0.3, 1)',
             }}
-            className="max-w-full max-h-full flex items-center justify-center relative shadow-surface-lg rounded-sm overflow-hidden ring-1 ring-white/10"
+            className="max-w-full max-h-full flex items-center justify-center relative shadow-patensify-lg rounded-lg overflow-hidden ring-1 ring-white/10 dark:ring-white/10"
           >
             <canvas
               ref={canvasRef}
-              className="max-w-[70vw] max-h-[70vh] object-contain block"
+              className="max-w-[70vw] max-h-[70vh] object-contain block rounded-lg"
             />
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center text-center p-8 max-w-sm">
+            <div className="w-12 h-12 rounded-2xl bg-[var(--chip-surface)] border border-[var(--border-subtle)] flex items-center justify-center mb-3 text-[var(--text-muted)]">
+              <ImageIcon className="w-5 h-5 stroke-[1.8]" />
+            </div>
+            <p className="text-xs font-semibold tracking-tight text-[var(--text-primary)] mb-1">
+              No Photo Selected
+            </p>
+            <p className="text-[11px] text-[var(--text-muted)] leading-relaxed font-sans">
+              Choose an image from the queue to inspect real-time aspect framing and watermark adjustments.
+            </p>
+          </div>
+        )}
+      </div>
+    </main>
+  );
 
             {isImageLoading && (
               <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center">

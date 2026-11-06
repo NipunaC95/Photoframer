@@ -73,19 +73,19 @@ export const SourceList: React.FC<SourceListProps> = ({
     switch (item.orientation) {
       case 'landscape':
         return (
-          <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20 font-mono">
+          <span className="text-[9px] px-2 py-0.5 rounded-full bg-[var(--chip-surface)] text-[var(--text-secondary)] border border-[var(--border-subtle)] font-mono tracking-wider uppercase">
             Landscape
           </span>
         );
       case 'portrait':
         return (
-          <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 font-mono">
+          <span className="text-[9px] px-2 py-0.5 rounded-full bg-[var(--peak)]/10 text-[var(--peak)] border border-[var(--peak)]/20 font-mono tracking-wider uppercase">
             Portrait
           </span>
         );
       case 'square':
         return (
-          <span className="text-[10px] px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-400 border border-purple-500/20 font-mono">
+          <span className="text-[9px] px-2 py-0.5 rounded-full bg-[var(--chip-surface)] text-[var(--text-secondary)] border border-[var(--border-subtle)] font-mono tracking-wider uppercase">
             Square
           </span>
         );
@@ -101,16 +101,16 @@ export const SourceList: React.FC<SourceListProps> = ({
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
       className={`w-80 h-full border-r border-[var(--border-subtle)] bg-[var(--bg-panel)] flex flex-col relative transition-all duration-150 ${
-        isDragOver ? 'ring-2 ring-cyan-500/80 bg-cyan-500/5' : ''
+        isDragOver ? 'ring-1 ring-white/40 bg-neutral-900/60' : ''
       }`}
     >
       {/* Top Header & Actions */}
-      <div className="p-3 border-b border-[var(--border-subtle)] space-y-2">
+      <div className="p-3.5 border-b border-[var(--border-subtle)] space-y-2.5">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-1.5 text-xs font-semibold text-[var(--text-primary)]">
-            <ImageIcon className="w-4 h-4 text-cyan-400" />
+          <div className="flex items-center space-x-2 text-xs font-semibold tracking-tight text-[var(--text-primary)]">
+            <ImageIcon className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
             <span>Source Images</span>
-            <span className="text-[11px] font-mono text-[var(--text-muted)]">
+            <span className="text-[11px] font-mono tabular-nums text-[var(--text-muted)]">
               ({items.length})
             </span>
           </div>
@@ -119,7 +119,7 @@ export const SourceList: React.FC<SourceListProps> = ({
             <button
               onClick={onClearAll}
               title="Clear all source images"
-              className="text-[11px] text-[var(--text-muted)] hover:text-red-400 flex items-center space-x-1 transition-colors px-1.5 py-0.5 rounded hover:bg-red-500/10"
+              className="text-[11px] text-[var(--text-muted)] hover:text-red-400 flex items-center space-x-1 transition-colors px-2 py-0.5 rounded-full hover:bg-red-500/10 font-mono"
             >
               <Trash2 className="w-3 h-3" />
               <span>Clear</span>
@@ -131,16 +131,16 @@ export const SourceList: React.FC<SourceListProps> = ({
         <div className="grid grid-cols-2 gap-2">
           <button
             onClick={onAddFiles}
-            className="flex items-center justify-center space-x-1.5 py-1.5 px-2 rounded-lg bg-[var(--bg-card)] hover:bg-[var(--bg-elevated)] border border-[var(--border-subtle)] hover:border-[var(--border-strong)] text-xs text-[var(--text-primary)] transition-colors active:scale-[0.98]"
+            className="flex items-center justify-center space-x-1.5 py-1.5 px-2 rounded-lg bg-[var(--chip-surface)] hover:bg-[var(--bg-elevated)] border border-[var(--border-subtle)] hover:border-[var(--border-strong)] text-xs text-[var(--text-primary)] transition-all active:scale-[0.98] font-medium"
           >
-            <FilePlus className="w-3.5 h-3.5 text-cyan-400" />
+            <FilePlus className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
             <span>Add Files</span>
           </button>
           <button
             onClick={onAddFolder}
-            className="flex items-center justify-center space-x-1.5 py-1.5 px-2 rounded-lg bg-[var(--bg-card)] hover:bg-[var(--bg-elevated)] border border-[var(--border-subtle)] hover:border-[var(--border-strong)] text-xs text-[var(--text-primary)] transition-colors active:scale-[0.98]"
+            className="flex items-center justify-center space-x-1.5 py-1.5 px-2 rounded-lg bg-[var(--chip-surface)] hover:bg-[var(--bg-elevated)] border border-[var(--border-subtle)] hover:border-[var(--border-strong)] text-xs text-[var(--text-primary)] transition-all active:scale-[0.98] font-medium"
           >
-            <FolderPlus className="w-3.5 h-3.5 text-blue-400" />
+            <FolderPlus className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
             <span>Add Folder</span>
           </button>
         </div>
@@ -150,36 +150,36 @@ export const SourceList: React.FC<SourceListProps> = ({
       {items.length === 0 ? (
         <div
           onClick={onAddFiles}
-          className="flex-1 flex flex-col items-center justify-center p-6 text-center cursor-pointer m-3 rounded-xl border-2 border-dashed border-[var(--border-subtle)] hover:border-cyan-500/50 hover:bg-[var(--bg-card)]/50 transition-all group"
+          className="flex-1 flex flex-col items-center justify-center p-6 text-center cursor-pointer m-3 rounded-xl border border-dashed border-[var(--border-subtle)] hover:border-white/30 hover:bg-[var(--bg-card)]/50 transition-all group"
         >
-          <div className="w-12 h-12 rounded-xl bg-[var(--bg-card)] flex items-center justify-center mb-3 group-hover:scale-110 group-hover:text-cyan-400 transition-all border border-[var(--border-subtle)] shadow-sm">
-            <UploadCloud className="w-6 h-6 text-[var(--text-muted)] group-hover:text-cyan-400" />
+          <div className="w-11 h-11 rounded-xl bg-[var(--bg-card)] flex items-center justify-center mb-3 group-hover:scale-105 transition-all border border-[var(--border-subtle)] shadow-sm">
+            <UploadCloud className="w-5 h-5 text-[var(--text-muted)] group-hover:text-[var(--text-primary)]" />
           </div>
-          <p className="text-xs font-medium text-[var(--text-primary)] mb-1">
-            Drag & Drop Images Here
+          <p className="text-xs font-semibold tracking-tight text-[var(--text-primary)] mb-1">
+            Drop images to load
           </p>
-          <p className="text-[11px] text-[var(--text-muted)] leading-relaxed">
-            or click to browse from device.
+          <p className="text-[11px] text-[var(--text-muted)] leading-relaxed font-sans">
+            or click to select from disk.
             <br />
-            Supports JPG, PNG, WebP, AVIF
+            <span className="font-mono text-[10px] tracking-wider uppercase text-[var(--text-secondary)]">JPG • PNG • WebP • AVIF</span>
           </p>
         </div>
       ) : (
-        <div className="flex-1 overflow-y-auto p-2 space-y-1.5">
+        <div className="flex-1 overflow-y-auto p-2.5 space-y-1.5">
           {items.map((item) => {
             const isSelected = selectedItem?.id === item.id;
             return (
               <div
                 key={item.id}
                 onClick={() => onSelectItem(item)}
-                className={`group relative flex items-center p-2 rounded-lg cursor-pointer transition-all border ${
+                className={`group relative flex items-center p-2 rounded-xl cursor-pointer transition-all border ${
                   isSelected
-                    ? 'bg-cyan-500/10 border-cyan-500/40 shadow-sm'
-                    : 'bg-[var(--bg-card)]/70 hover:bg-[var(--bg-card)] border-[var(--border-subtle)] hover:border-[var(--border-strong)]'
+                    ? 'bg-white/[0.08] dark:bg-white/[0.08] border-white/20 shadow-sm'
+                    : 'bg-[var(--bg-card)]/60 hover:bg-[var(--bg-card)] border-[var(--border-subtle)] hover:border-[var(--border-strong)]'
                 }`}
               >
                 {/* Thumbnail */}
-                <div className="w-12 h-12 rounded bg-black/40 overflow-hidden shrink-0 flex items-center justify-center border border-white/5 relative">
+                <div className="w-11 h-11 rounded-lg bg-black/40 overflow-hidden shrink-0 flex items-center justify-center border border-white/5 relative">
                   {item.thumbnailUrl ? (
                     <img
                       src={item.thumbnailUrl}
@@ -187,9 +187,9 @@ export const SourceList: React.FC<SourceListProps> = ({
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <ImageIcon className="w-5 h-5 text-gray-500" />
+                    <ImageIcon className="w-4 h-4 text-neutral-500" />
                   )}
-                  <span className="absolute bottom-0.5 right-0.5 text-[8px] font-mono uppercase px-1 py-0.2 rounded bg-black/70 text-gray-300">
+                  <span className="absolute bottom-0.5 right-0.5 text-[8px] font-mono uppercase px-1 py-0.2 rounded bg-black/80 text-neutral-300">
                     {item.format}
                   </span>
                 </div>
@@ -197,12 +197,12 @@ export const SourceList: React.FC<SourceListProps> = ({
                 {/* Details */}
                 <div className="ml-2.5 flex-1 min-w-0 pr-6">
                   <p
-                    className="text-xs font-medium text-[var(--text-primary)] truncate"
+                    className="text-xs font-medium tracking-tight text-[var(--text-primary)] truncate"
                     title={item.fileName}
                   >
                     {item.fileName}
                   </p>
-                  <div className="flex items-center space-x-1.5 mt-0.5 text-[10px] text-[var(--text-muted)] font-mono">
+                  <div className="flex items-center space-x-1.5 mt-0.5 text-[10px] text-[var(--text-muted)] font-mono tabular-nums">
                     <span>{formatDimensions(item.width, item.height)}</span>
                     <span>•</span>
                     <span>{formatBytes(item.fileSize)}</span>
@@ -231,17 +231,17 @@ export const SourceList: React.FC<SourceListProps> = ({
 
       {/* Footer Info */}
       {items.length > 0 && (
-        <div className="p-2.5 border-t border-[var(--border-subtle)] bg-[var(--bg-panel)] flex items-center justify-between text-[11px] text-[var(--text-muted)] font-mono">
-          <span>{items.length} items</span>
+        <div className="p-3 border-t border-[var(--border-subtle)] bg-[var(--bg-panel)] flex items-center justify-between text-[11px] text-[var(--text-muted)] font-mono tabular-nums">
+          <span>{items.length} photos</span>
           <span>{formatBytes(totalBytes)}</span>
         </div>
       )}
 
       {/* Drag Over Overlay */}
       {isDragOver && (
-        <div className="absolute inset-0 bg-cyan-950/80 backdrop-blur-sm flex flex-col items-center justify-center z-30 pointer-events-none border-2 border-dashed border-cyan-400">
-          <UploadCloud className="w-10 h-10 text-cyan-400 animate-bounce mb-2" />
-          <p className="text-xs font-semibold text-white">Drop images to import</p>
+        <div className="absolute inset-0 bg-neutral-950/85 backdrop-blur-md flex flex-col items-center justify-center z-30 pointer-events-none border-2 border-dashed border-white/40">
+          <UploadCloud className="w-9 h-9 text-white animate-bounce mb-2" />
+          <p className="text-xs font-semibold text-white tracking-tight">Drop photos to import</p>
         </div>
       )}
     </aside>
