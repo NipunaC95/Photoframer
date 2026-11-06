@@ -1,6 +1,7 @@
 import sharp from 'sharp';
 import path from 'path';
 import fs from 'fs/promises';
+import os from 'os';
 import {
   AspectSettings,
   WatermarkSettings,
@@ -358,7 +359,7 @@ export async function processBatchImages(
   watermarkSettings: WatermarkSettings,
   exportSettings: ExportSettings,
   onProgress: (payload: BatchProgressPayload) => void,
-  shouldCancel: () => boolean
+  shouldCancel: () => boolean = () => false
 ): Promise<ProcessBatchResult> {
   const errors: Array<{ fileName: string; error: string }> = [];
   let successCount = 0;
@@ -402,6 +403,7 @@ export async function processBatchImages(
       outputPath: outputDir,
     });
 
+    let tmpIccPath: string | null = null;
     try {
       const { pipeline, origMetadata } = await buildProcessedImage(
         item.filePath,
@@ -410,9 +412,19 @@ export async function processBatchImages(
       );
 
       // Preserve embedded ICC profile and essential color metadata
-      if (origMetadata?.icc) {
-        pipeline.withMetadata({ icc: origMetadata.icc });
-      } else {
+      try {
+        if (Buffer.isBuffer(origMetadata?.icc)) {
+          // Sharp expects a filepath or profile name string for icc, so write the raw buffer to a temp profile file
+          tmpIccPath = path.join(os.tmpdir(), `photoframer_icc_${Date.now()}_${i}.icc`);
+          await fs.writeFile(tmpIccPath, origMetadata.icc);
+          pipeline.withMetadata({ icc: tmpIccPath });
+        } else if (typeof origMetadata?.icc === 'string') {
+          pipeline.withMetadata({ icc: origMetadata.icc });
+        } else {
+          pipeline.withMetadata();
+        }
+      } catch (iccErr) {
+        console.warn(`Could not attach custom ICC profile for ${item.fileName}, falling back to default sRGB:`, iccErr);
         pipeline.withMetadata();
       }
 
@@ -465,6 +477,10 @@ export async function processBatchImages(
         fileName: item.fileName,
         error: err?.message || 'Processing failed',
       });
+    } finally {
+      if (tmpIccPath) {
+        await fs.unlink(tmpIccPath).catch(() => {});
+      }
     }
 
     onProgress({
