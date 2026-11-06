@@ -328,42 +328,44 @@ export const App: React.FC = () => {
         {/* Right: Studio Control Inspector */}
         <aside className="w-84 border-l border-[var(--border-subtle)] bg-[var(--bg-panel)] flex flex-col h-full z-10 shrink-0">
           {/* Inspector Navigation Tabs */}
-          <div className="grid grid-cols-3 border-b border-[var(--border-subtle)] p-1 bg-[var(--bg-panel)]">
-            <button
-              onClick={() => setActiveTab('aspect')}
-              className={`flex items-center justify-center space-x-1.5 py-2 rounded-lg text-xs font-medium transition-all ${
-                activeTab === 'aspect'
-                  ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 shadow-sm'
-                  : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
-              }`}
-            >
-              <Crop className="w-3.5 h-3.5" />
-              <span>Canvas</span>
-            </button>
+          <div className="p-2.5 border-b border-[var(--border-subtle)] bg-[var(--bg-panel)]">
+            <div className="grid grid-cols-3 gap-1 p-1 rounded-xl bg-[var(--chip-surface)] border border-[var(--border-subtle)]">
+              <button
+                onClick={() => setActiveTab('aspect')}
+                className={`flex items-center justify-center space-x-1.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  activeTab === 'aspect'
+                    ? 'bg-white text-black dark:bg-white dark:text-black font-semibold shadow-patensify-sm'
+                    : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
+                }`}
+              >
+                <Crop className="w-3.5 h-3.5" />
+                <span>Canvas</span>
+              </button>
 
-            <button
-              onClick={() => setActiveTab('watermark')}
-              className={`flex items-center justify-center space-x-1.5 py-2 rounded-lg text-xs font-medium transition-all ${
-                activeTab === 'watermark'
-                  ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 shadow-sm'
-                  : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
-              }`}
-            >
-              <Stamp className="w-3.5 h-3.5" />
-              <span>Logo</span>
-            </button>
+              <button
+                onClick={() => setActiveTab('watermark')}
+                className={`flex items-center justify-center space-x-1.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  activeTab === 'watermark'
+                    ? 'bg-white text-black dark:bg-white dark:text-black font-semibold shadow-patensify-sm'
+                    : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
+                }`}
+              >
+                <Stamp className="w-3.5 h-3.5" />
+                <span>Logo</span>
+              </button>
 
-            <button
-              onClick={() => setActiveTab('export')}
-              className={`flex items-center justify-center space-x-1.5 py-2 rounded-lg text-xs font-medium transition-all ${
-                activeTab === 'export'
-                  ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 shadow-sm'
-                  : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
-              }`}
-            >
-              <Download className="w-3.5 h-3.5" />
-              <span>Export</span>
-            </button>
+              <button
+                onClick={() => setActiveTab('export')}
+                className={`flex items-center justify-center space-x-1.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  activeTab === 'export'
+                    ? 'bg-white text-black dark:bg-white dark:text-black font-semibold shadow-patensify-sm'
+                    : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
+                }`}
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Export</span>
+              </button>
+            </div>
           </div>
 
           {/* Inspector Panel Body */}
