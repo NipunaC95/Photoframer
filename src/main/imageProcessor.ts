@@ -255,7 +255,7 @@ export async function buildProcessedImage(
   sourceFilePath: string,
   aspectSettings: AspectSettings,
   watermarkSettings: WatermarkSettings
-): Promise<{ pipeline: sharp.Sharp; canvasDims: CanvasDimensions }> {
+): Promise<{ pipeline: sharp.Sharp; canvasDims: CanvasDimensions; origMetadata: sharp.Metadata }> {
   const origMetadata = await sharp(sourceFilePath).metadata();
   const origWidth = origMetadata.width || 1000;
   const origHeight = origMetadata.height || 1000;
@@ -314,6 +314,7 @@ export async function buildProcessedImage(
   return {
     pipeline: baseSharp.composite(composites),
     canvasDims,
+    origMetadata,
   };
 }
 
@@ -402,11 +403,18 @@ export async function processBatchImages(
     });
 
     try {
-      const { pipeline } = await buildProcessedImage(
+      const { pipeline, origMetadata } = await buildProcessedImage(
         item.filePath,
         aspectSettings,
         watermarkSettings
       );
+
+      // Preserve embedded ICC profile and essential color metadata
+      if (origMetadata?.icc) {
+        pipeline.withMetadata({ icc: origMetadata.icc });
+      } else {
+        pipeline.withMetadata();
+      }
 
       // Determine output extension and format
       const origExt = path.extname(item.fileName).toLowerCase();
@@ -418,21 +426,29 @@ export async function processBatchImages(
 
       if (formatSetting === 'jpeg') {
         targetExt = '.jpg';
-        pipeline.jpeg({ quality, mozjpeg: true });
+        pipeline.jpeg({
+          quality,
+          mozjpeg: true,
+          chromaSubsampling: quality >= 90 ? '4:4:4' : '4:2:0',
+        });
       } else if (formatSetting === 'png') {
         targetExt = '.png';
-        pipeline.png({ quality: Math.min(100, Math.round(quality)) });
+        pipeline.png({ compressionLevel: 9 });
       } else if (formatSetting === 'webp') {
         targetExt = '.webp';
-        pipeline.webp({ quality });
+        pipeline.webp({ quality, lossless: quality === 100 });
       } else {
         // 'original' format
         if (origExt === '.png') {
-          pipeline.png({ quality: Math.min(100, Math.round(quality)) });
+          pipeline.png({ compressionLevel: 9 });
         } else if (origExt === '.webp') {
-          pipeline.webp({ quality });
+          pipeline.webp({ quality, lossless: quality === 100 });
         } else {
-          pipeline.jpeg({ quality, mozjpeg: true });
+          pipeline.jpeg({
+            quality,
+            mozjpeg: true,
+            chromaSubsampling: quality >= 90 ? '4:4:4' : '4:2:0',
+          });
         }
       }
 
