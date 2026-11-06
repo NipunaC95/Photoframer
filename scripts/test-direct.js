@@ -5,15 +5,18 @@ const path = require('path');
 console.log('Starting Electron in interactive mode...');
 console.log('electronPath:', electronPath);
 
+const cleanEnv = {
+  ...process.env,
+  ELECTRON_ENABLE_LOGGING: '1',
+};
+delete cleanEnv.ELECTRON_RUN_AS_NODE;
+
 const proc = spawn(electronPath, [
   path.resolve(__dirname, '..'),
   '--no-sandbox',
 ], {
   stdio: 'inherit',
-  env: {
-    ...process.env,
-    ELECTRON_ENABLE_LOGGING: '1',
-  }
+  env: cleanEnv,
 });
 
 proc.on('error', (err) => {

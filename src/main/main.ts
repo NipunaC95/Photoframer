@@ -108,20 +108,35 @@ function createWindow() {
     logDebug(`Renderer console [${level}]: ${message} (${sourceId}:${line})`);
   });
 
-  // Strict Content Security Policy
+  // Content Security Policy
+  const devServerUrl = process.env.VITE_DEV_SERVER_URL;
   mainWindow.webContents.session.webRequest.onHeadersReceived((details, callback) => {
+    // In dev mode, allow 'unsafe-inline' and 'unsafe-eval' plus connect-src ws: for Vite HMR
+    const csp = devServerUrl
+      ? "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: app-img:; font-src 'self' data:; connect-src 'self' ws: http:;"
+      : "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: app-img:; font-src 'self' data:;";
+
     callback({
       responseHeaders: {
         ...details.responseHeaders,
-        'Content-Security-Policy': [
-          "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: app-img:; font-src 'self' data:;",
-        ],
+        'Content-Security-Policy': [csp],
       },
     });
   });
 
+  // Enable F12 or Cmd/Ctrl+Shift+I for DevTools in development
+  if (devServerUrl || process.env.NODE_ENV === 'development') {
+    mainWindow.webContents.on('before-input-event', (event, input) => {
+      if (
+        input.key === 'F12' ||
+        ((input.control || input.meta) && input.shift && input.key.toLowerCase() === 'i')
+      ) {
+        mainWindow?.webContents.toggleDevTools();
+      }
+    });
+  }
+
   // In development, load from Vite dev server; in production, load local dist index.html
-  const devServerUrl = process.env.VITE_DEV_SERVER_URL;
   if (devServerUrl) {
     mainWindow.loadURL(devServerUrl);
   } else {

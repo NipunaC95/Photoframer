@@ -4,13 +4,16 @@ const path = require('path');
 console.log('Testing Electron startup and window initialization...');
 
 const electronBin = process.platform === 'win32' ? 'npx.cmd' : 'npx';
+const cleanEnv = {
+  ...process.env,
+  TEST_MODE: '1',
+};
+delete cleanEnv.ELECTRON_RUN_AS_NODE;
+
 const child = spawn(electronBin, ['electron', '.', '--test-mode'], {
   cwd: path.resolve(__dirname, '..'),
   shell: true,
-  env: {
-    ...process.env,
-    TEST_MODE: '1',
-  },
+  env: cleanEnv,
   stdio: 'pipe',
 });
 

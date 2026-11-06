@@ -4,12 +4,16 @@ const path = require('path');
 
 console.log('electronPath:', electronPath);
 
+const cleanEnv = { ...process.env };
+delete cleanEnv.ELECTRON_RUN_AS_NODE;
+
 const proc = spawn(electronPath, [
   path.resolve(__dirname, '..'),
   '--no-sandbox',
 ], {
   detached: true,
   stdio: 'ignore',
+  env: cleanEnv,
 });
 
 proc.unref();

@@ -47,14 +47,17 @@ async function run() {
   console.log('[dev-runner] Vite server is ready! Launching Electron...');
 
   const electronBin = process.platform === 'win32' ? 'npx.cmd' : 'npx';
+  const cleanEnv = {
+    ...process.env,
+    VITE_DEV_SERVER_URL: DEV_SERVER_URL,
+    NODE_ENV: 'development',
+  };
+  delete cleanEnv.ELECTRON_RUN_AS_NODE;
+
   const electronProcess = spawn(electronBin, ['electron', '.'], {
     stdio: 'inherit',
     shell: true,
-    env: {
-      ...process.env,
-      VITE_DEV_SERVER_URL: DEV_SERVER_URL,
-      NODE_ENV: 'development',
-    },
+    env: cleanEnv,
     cwd: path.resolve(__dirname, '..')
   });
 
