@@ -4,8 +4,6 @@ import {
   FilePlus,
   Trash2,
   Image as ImageIcon,
-  Compass,
-  CheckCircle2,
   X,
   UploadCloud,
 } from 'lucide-react';

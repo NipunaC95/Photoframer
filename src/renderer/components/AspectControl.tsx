@@ -9,7 +9,7 @@ import {
   Sparkles,
   Droplets,
 } from 'lucide-react';
-import { AspectSettings, AspectPreset, BackgroundMode } from '../types';
+import { AspectSettings, AspectPreset } from '../types';
 
 interface AspectControlProps {
   settings: AspectSettings;

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Folder, FolderOpen, Download, HardDrive } from 'lucide-react';
+import { FolderOpen, Download, HardDrive } from 'lucide-react';
 import { ExportSettings } from '../types';
 
 interface ExportSettingsControlProps {

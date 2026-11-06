@@ -143,7 +143,7 @@ function createWindow() {
 
   // Enable F12 or Cmd/Ctrl+Shift+I for DevTools in development
   if (devServerUrl || process.env.NODE_ENV === 'development') {
-    mainWindow.webContents.on('before-input-event', (event, input) => {
+    mainWindow.webContents.on('before-input-event', (_event, input) => {
       if (
         input.key === 'F12' ||
         ((input.control || input.meta) && input.shift && input.key.toLowerCase() === 'i')

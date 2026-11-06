@@ -56,6 +56,9 @@ export interface BatchProgressPayload {
   currentIndex: number;
   totalImages: number;
   currentFileName: string;
+  savingFileName?: string;
+  thumbnailUrl?: string;
+  destinationPath?: string;
   progressPercent: number;
   status: 'processing' | 'completed' | 'cancelled' | 'error';
   errorMessage?: string;

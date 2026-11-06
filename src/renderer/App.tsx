@@ -16,7 +16,7 @@ import {
   BatchProgressPayload,
   ProcessBatchResult,
 } from './types';
-import { Crop, Stamp, Download, SlidersHorizontal } from 'lucide-react';
+import { Crop, Stamp, Download } from 'lucide-react';
 
 export const App: React.FC = () => {
   // Theme state (dark / light)

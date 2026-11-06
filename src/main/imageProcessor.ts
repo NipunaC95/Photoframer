@@ -394,10 +394,43 @@ export async function processBatchImages(
 
     const item = items[i];
 
+    // Determine output extension and format
+    const origExt = path.extname(item.fileName).toLowerCase();
+    const baseName = path.basename(item.fileName, origExt);
+
+    let targetExt = origExt;
+    const formatSetting = exportSettings.outputFormat;
+    const quality = Math.max(1, Math.min(100, exportSettings.quality || 90));
+
+    if (formatSetting === 'jpeg') {
+      targetExt = '.jpg';
+    } else if (formatSetting === 'png') {
+      targetExt = '.png';
+    } else if (formatSetting === 'webp') {
+      targetExt = '.webp';
+    } else {
+      // 'original' format
+      if (origExt === '.png') {
+        targetExt = '.png';
+      } else if (origExt === '.webp') {
+        targetExt = '.webp';
+      } else {
+        targetExt = '.jpg';
+      }
+    }
+
+    const prefix = exportSettings.prefix || '';
+    const suffix = exportSettings.suffix || '';
+    const finalFileName = `${prefix}${baseName}${suffix}${targetExt}`;
+    const destinationPath = path.join(outputDir, finalFileName);
+
     onProgress({
       currentIndex: i + 1,
       totalImages: total,
       currentFileName: item.fileName,
+      savingFileName: finalFileName,
+      thumbnailUrl: item.thumbnailUrl,
+      destinationPath: destinationPath,
       progressPercent: Math.round(((i) / total) * 100),
       status: 'processing',
       outputPath: outputDir,
@@ -428,26 +461,15 @@ export async function processBatchImages(
         pipeline.withMetadata();
       }
 
-      // Determine output extension and format
-      const origExt = path.extname(item.fileName).toLowerCase();
-      const baseName = path.basename(item.fileName, origExt);
-
-      let targetExt = origExt;
-      const formatSetting = exportSettings.outputFormat;
-      const quality = Math.max(1, Math.min(100, exportSettings.quality || 90));
-
       if (formatSetting === 'jpeg') {
-        targetExt = '.jpg';
         pipeline.jpeg({
           quality,
           mozjpeg: true,
           chromaSubsampling: quality >= 90 ? '4:4:4' : '4:2:0',
         });
       } else if (formatSetting === 'png') {
-        targetExt = '.png';
         pipeline.png({ compressionLevel: 9 });
       } else if (formatSetting === 'webp') {
-        targetExt = '.webp';
         pipeline.webp({ quality, lossless: quality === 100 });
       } else {
         // 'original' format
@@ -463,11 +485,6 @@ export async function processBatchImages(
           });
         }
       }
-
-      const prefix = exportSettings.prefix || '';
-      const suffix = exportSettings.suffix || '';
-      const finalFileName = `${prefix}${baseName}${suffix}${targetExt}`;
-      const destinationPath = path.join(outputDir, finalFileName);
 
       await pipeline.toFile(destinationPath);
       successCount++;
@@ -487,6 +504,9 @@ export async function processBatchImages(
       currentIndex: i + 1,
       totalImages: total,
       currentFileName: item.fileName,
+      savingFileName: finalFileName,
+      thumbnailUrl: item.thumbnailUrl,
+      destinationPath: destinationPath,
       progressPercent: Math.round(((i + 1) / total) * 100),
       status: i + 1 === total ? 'completed' : 'processing',
       outputPath: outputDir,
