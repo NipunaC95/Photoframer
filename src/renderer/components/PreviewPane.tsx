@@ -264,57 +264,34 @@ export const PreviewPane: React.FC<PreviewPaneProps> = ({
           </div>
         )}
       </div>
-    </main>
-  );
-
-            {isImageLoading && (
-              <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center">
-                <Sparkles className="w-6 h-6 text-cyan-400 animate-spin" />
-              </div>
-            )}
-          </div>
-        ) : (
-          <div className="text-center p-8 max-w-sm rounded-2xl bg-[var(--bg-panel)]/80 backdrop-blur-sm border border-[var(--border-subtle)] shadow-surface-md">
-            <div className="w-12 h-12 rounded-xl bg-cyan-500/10 text-cyan-400 mx-auto flex items-center justify-center mb-3">
-              <ImageIcon className="w-6 h-6" />
-            </div>
-            <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-1">
-              No Image Selected
-            </h3>
-            <p className="text-xs text-[var(--text-muted)] leading-relaxed">
-              Add source images to the left sidebar queue and click one to configure real-time aspect padding and watermark overlays.
-            </p>
-          </div>
-        )}
-      </div>
 
       {/* Floating Canvas Meta Badge */}
-      {dimensions && (
-        <div className="absolute bottom-4 left-4 bg-[var(--bg-panel)]/90 backdrop-blur-md px-3 py-1.5 rounded-lg border border-[var(--border-subtle)] text-[11px] font-mono flex items-center space-x-3 text-[var(--text-secondary)] shadow-surface-md pointer-events-none">
+      {dimensions && selectedItem && (
+        <div className="absolute bottom-4 left-4 bg-[var(--bg-panel)]/80 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-[var(--border-subtle)] text-[11px] font-mono tabular-nums flex items-center space-x-3 text-[var(--text-secondary)] shadow-patensify-md pointer-events-none">
           <div className="flex items-center space-x-1.5">
-            <span className="w-2 h-2 rounded-full bg-cyan-400"></span>
-            <span>Target:</span>
-            <strong className="text-[var(--text-primary)]">
+            <span className="w-1.5 h-1.5 rounded-full bg-[var(--peak)]"></span>
+            <span className="text-[var(--text-muted)]">Target:</span>
+            <span className="text-[var(--text-primary)] font-semibold">
               {aspectSettings.preset === 'custom'
                 ? `${aspectSettings.customWidth}:${aspectSettings.customHeight}`
                 : aspectSettings.preset}
-            </strong>
+            </span>
           </div>
-          <span>•</span>
+          <span className="text-[var(--border-strong)]">•</span>
           <div>
-            Fill:{' '}
-            <strong className="text-[var(--text-primary)] capitalize">
-              {aspectSettings.backgroundMode === 'blur' ? 'Blurred Bokeh' : aspectSettings.solidColor}
-            </strong>
+            <span className="text-[var(--text-muted)]">Fill:</span>{' '}
+            <span className="text-[var(--text-primary)] capitalize font-semibold">
+              {aspectSettings.backgroundMode === 'blur' ? 'Bokeh' : aspectSettings.solidColor}
+            </span>
           </div>
           {watermarkSettings.enabled && (
             <>
-              <span>•</span>
+              <span className="text-[var(--border-strong)]">•</span>
               <div>
-                Watermark:{' '}
-                <strong className="text-cyan-400 capitalize">
+                <span className="text-[var(--text-muted)]">Logo:</span>{' '}
+                <span className="text-[var(--text-primary)] capitalize font-semibold">
                   {watermarkSettings.anchor.replace('-', ' ')} ({watermarkSettings.sizePercent}%)
-                </strong>
+                </span>
               </div>
             </>
           )}
