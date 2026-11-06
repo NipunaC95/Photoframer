@@ -1,15 +1,66 @@
 # Dependencies
 node_modules/
+.pnp
+.pnp.js
 
-# Production builds
+# Production and packaging builds
 dist/
+dist-ssr/
+build/
+out/
 release/
+*.tsbuildinfo
 
-# Test exports & logs
+# Electron packager and builder output
+*.dmg
+*.exe
+*.zip
+*.blockmap
+*.AppImage
+*.deb
+*.rpm
+latest*.yml
+builder-debug.yml
+builder-effective-config.yaml
+
+# Vite & bundler cache
+.vite/
+.cache/
+
+# Test exports & reports
 sample-assets/Exported-Test/
+coverage/
+*.lcov
+.nyc_output/
+
+# Logs
 *.log
 npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+electron-debug.log*
 
-# OS Files
+# Environment & local overrides
+.env
+.env.local
+.env.*.local
+*.local
+
+# OS generated files
 .DS_Store
+.DS_Store?
+._*
 Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# IDE & Editor files
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
