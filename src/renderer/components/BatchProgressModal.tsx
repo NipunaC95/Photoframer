@@ -265,7 +265,7 @@ export const BatchProgressModal: React.FC<BatchProgressModalProps> = ({
             </button>
           )}
 
-          {isCompleted && currentFolder && (
+          {isCompleted && currentFolder && typeof window !== 'undefined' && !!(window as any).electronAPI && (
             <button
               onClick={() => onOpenOutputFolder(currentFolder)}
               className="flex items-center space-x-1.5 px-4 py-1.5 rounded-lg text-xs font-medium bg-[var(--chip-surface)] hover:bg-[var(--bg-elevated)] text-[var(--text-primary)] border border-[var(--border-subtle)] transition-all"

@@ -39,6 +39,8 @@ export interface ExportSettings {
   suffix: string;
 }
 
+export type ImageOrientation = 'landscape' | 'portrait' | 'square';
+
 export interface SourceImageItem {
   id: string;
   filePath: string;
@@ -47,9 +49,10 @@ export interface SourceImageItem {
   width: number;
   height: number;
   aspectRatio: number;
-  orientation: 'landscape' | 'portrait' | 'square';
-  format: string;
+  orientation: ImageOrientation;
+  format?: string;
   thumbnailUrl?: string;
+  rawFile?: File;
 }
 
 export interface BatchProgressPayload {

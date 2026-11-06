@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Header,
 } from './components/Header';
@@ -17,8 +17,19 @@ import {
   ProcessBatchResult,
 } from './types';
 import { Crop, Stamp, Download } from 'lucide-react';
+import {
+  isElectronApp,
+  selectFilesWeb,
+  selectFolderWeb,
+  selectWatermarkWeb,
+  parseFilesToSourceItems,
+} from './utils/fileHelpers';
+import { processBatchWeb } from './utils/webBatchProcessor';
 
 export const App: React.FC = () => {
+  const isElectron = isElectronApp();
+  const isCancelledRef = useRef<boolean>(false);
+
   // Theme state (dark / light)
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
 
@@ -51,7 +62,7 @@ export const App: React.FC = () => {
 
   // Export settings
   const [exportSettings, setExportSettings] = useState<ExportSettings>({
-    outputFolder: null,
+    outputFolder: isElectron ? null : 'Downloads (ZIP Archive)',
     outputFormat: 'original',
     quality: 90,
     prefix: '',
@@ -147,7 +158,13 @@ export const App: React.FC = () => {
     }
 
     const img = new Image();
-    const safeSrc = `app-img://image?path=${encodeURIComponent(watermarkSettings.filePath)}`;
+    const hasElectron = typeof window !== 'undefined' && !!(window as any).electronAPI;
+    const isBlobOrData = watermarkThumbnail?.startsWith('blob:') || watermarkThumbnail?.startsWith('data:');
+
+    const safeSrc = !hasElectron || isBlobOrData
+      ? (watermarkThumbnail || watermarkSettings.filePath)
+      : `app-img://image?path=${encodeURIComponent(watermarkSettings.filePath)}`;
+
     img.src = safeSrc;
 
     img.onload = () => {
@@ -155,7 +172,7 @@ export const App: React.FC = () => {
     };
 
     img.onerror = () => {
-      if (watermarkThumbnail) {
+      if (watermarkThumbnail && img.src !== watermarkThumbnail) {
         img.src = watermarkThumbnail;
       }
     };
@@ -163,17 +180,25 @@ export const App: React.FC = () => {
 
   // File Handlers
   const handleAddFiles = async () => {
-    if (!window.electronAPI?.openFiles) return;
     try {
-      const newItems = await window.electronAPI.openFiles();
+      let newItems: SourceImageItem[] = [];
+      if (window.electronAPI?.openFiles) {
+        newItems = await window.electronAPI.openFiles();
+      } else {
+        const files = await selectFilesWeb(true);
+        if (files.length > 0) {
+          newItems = await parseFilesToSourceItems(files);
+        }
+      }
+
       if (newItems && newItems.length > 0) {
         setItems((prev) => {
           const combined = [...prev, ...newItems];
-          // Deduplicate by filePath
           const seen = new Set<string>();
           return combined.filter((it) => {
-            if (seen.has(it.filePath)) return false;
-            seen.add(it.filePath);
+            const key = it.id || it.filePath;
+            if (seen.has(key)) return false;
+            seen.add(key);
             return true;
           });
         });
@@ -187,16 +212,25 @@ export const App: React.FC = () => {
   };
 
   const handleAddFolder = async () => {
-    if (!window.electronAPI?.openFolder) return;
     try {
-      const newItems = await window.electronAPI.openFolder();
+      let newItems: SourceImageItem[] = [];
+      if (window.electronAPI?.openFolder) {
+        newItems = await window.electronAPI.openFolder();
+      } else {
+        const files = await selectFolderWeb();
+        if (files.length > 0) {
+          newItems = await parseFilesToSourceItems(files);
+        }
+      }
+
       if (newItems && newItems.length > 0) {
         setItems((prev) => {
           const combined = [...prev, ...newItems];
           const seen = new Set<string>();
           return combined.filter((it) => {
-            if (seen.has(it.filePath)) return false;
-            seen.add(it.filePath);
+            const key = it.id || it.filePath;
+            if (seen.has(key)) return false;
+            seen.add(key);
             return true;
           });
         });
@@ -209,17 +243,23 @@ export const App: React.FC = () => {
     }
   };
 
-  const handleDropFiles = async (paths: string[]) => {
-    if (!window.electronAPI?.inspectPaths) return;
+  const handleDropFiles = async (paths: string[], files?: File[]) => {
     try {
-      const newItems = await window.electronAPI.inspectPaths(paths);
+      let newItems: SourceImageItem[] = [];
+      if (window.electronAPI?.inspectPaths && paths.length > 0) {
+        newItems = await window.electronAPI.inspectPaths(paths);
+      } else if (files && files.length > 0) {
+        newItems = await parseFilesToSourceItems(files);
+      }
+
       if (newItems && newItems.length > 0) {
         setItems((prev) => {
           const combined = [...prev, ...newItems];
           const seen = new Set<string>();
           return combined.filter((it) => {
-            if (seen.has(it.filePath)) return false;
-            seen.add(it.filePath);
+            const key = it.id || it.filePath;
+            if (seen.has(key)) return false;
+            seen.add(key);
             return true;
           });
         });
@@ -228,7 +268,7 @@ export const App: React.FC = () => {
         }
       }
     } catch (err) {
-      console.error('Error handling dropped paths:', err);
+      console.error('Error handling dropped items:', err);
     }
   };
 
@@ -249,14 +289,19 @@ export const App: React.FC = () => {
 
   // Watermark selector
   const handleSelectWatermark = async () => {
-    if (!window.electronAPI?.selectWatermark) return;
     try {
-      const res = await window.electronAPI.selectWatermark();
+      let res: { filePath: string; thumbnailUrl: string; fileName: string } | null = null;
+      if (window.electronAPI?.selectWatermark) {
+        res = await window.electronAPI.selectWatermark();
+      } else {
+        res = await selectWatermarkWeb();
+      }
+
       if (res) {
         setWatermarkSettings((prev) => ({
           ...prev,
           enabled: true,
-          filePath: res.filePath,
+          filePath: res!.filePath,
         }));
         setWatermarkThumbnail(res.thumbnailUrl);
         setWatermarkFileName(res.fileName);
@@ -275,85 +320,129 @@ export const App: React.FC = () => {
 
   // Output folder selector
   const handleSelectOutputFolder = async () => {
-    if (!window.electronAPI?.selectOutputFolder) return;
-    try {
-      const folder = await window.electronAPI.selectOutputFolder();
-      if (folder) {
-        setExportSettings((prev) => ({ ...prev, outputFolder: folder }));
+    if (window.electronAPI?.selectOutputFolder) {
+      try {
+        const folder = await window.electronAPI.selectOutputFolder();
+        if (folder) {
+          setExportSettings((prev) => ({ ...prev, outputFolder: folder }));
+        }
+      } catch (err) {
+        console.error('Error selecting output directory:', err);
       }
-    } catch (err) {
-      console.error('Error selecting output directory:', err);
     }
   };
 
-  // Start batch processing (prompts for export destination directory first)
+  // Start batch processing (Electron native or Web client-side)
   const handleStartBatch = async () => {
     if (items.length === 0 || isProcessing) return;
 
-    // Ask user for destination folder before proceeding
-    let targetFolder = exportSettings.outputFolder;
-    if (window.electronAPI?.selectOutputFolder) {
-      let initialDir = targetFolder;
-      if (!initialDir) {
-        const samplePath = selectedItem?.filePath || items[0]?.filePath;
-        if (samplePath) {
-          const sep = samplePath.includes('/') ? '/' : '\\';
-          initialDir = samplePath.substring(0, samplePath.lastIndexOf(sep));
+    if (window.electronAPI?.startBatch) {
+      // Native Electron workflow
+      let targetFolder = exportSettings.outputFolder;
+      if (window.electronAPI.selectOutputFolder) {
+        let initialDir = targetFolder;
+        if (!initialDir) {
+          const samplePath = selectedItem?.filePath || items[0]?.filePath;
+          if (samplePath) {
+            const sep = samplePath.includes('/') ? '/' : '\\';
+            initialDir = samplePath.substring(0, samplePath.lastIndexOf(sep));
+          }
         }
+
+        const chosen = await window.electronAPI.selectOutputFolder(initialDir || undefined);
+        if (!chosen) {
+          return;
+        }
+        targetFolder = chosen;
+        setExportSettings((prev) => ({ ...prev, outputFolder: chosen }));
       }
 
-      const chosen = await window.electronAPI.selectOutputFolder(initialDir || undefined);
-      if (!chosen) {
-        // User cancelled folder picker; abort export
-        return;
-      }
-      targetFolder = chosen;
-      setExportSettings((prev) => ({ ...prev, outputFolder: chosen }));
-    }
+      if (!targetFolder) return;
 
-    if (!targetFolder) return;
-
-    setIsProcessing(true);
-    setBatchResult(null);
-    setBatchProgress({
-      currentIndex: 0,
-      totalImages: items.length,
-      currentFileName: items[0].fileName,
-      progressPercent: 0,
-      status: 'processing',
-    });
-    setIsProgressModalOpen(true);
-
-    try {
-      const result = await window.electronAPI.startBatch({
-        items,
-        aspectSettings,
-        watermarkSettings,
-        exportSettings: {
-          ...exportSettings,
-          outputFolder: targetFolder,
-        },
+      setIsProcessing(true);
+      setBatchResult(null);
+      setBatchProgress({
+        currentIndex: 0,
+        totalImages: items.length,
+        currentFileName: items[0].fileName,
+        progressPercent: 0,
+        status: 'processing',
       });
-      setBatchResult(result);
-    } catch (err: any) {
-      console.error('Batch processing encountered error:', err);
-      setBatchProgress((prev) =>
-        prev
-          ? {
-              ...prev,
-              status: 'error',
-              errorMessage: err.message || 'Batch execution failed',
-            }
-          : null
-      );
-    } finally {
-      setIsProcessing(false);
+      setIsProgressModalOpen(true);
+
+      try {
+        const result = await window.electronAPI.startBatch({
+          items,
+          aspectSettings,
+          watermarkSettings,
+          exportSettings: {
+            ...exportSettings,
+            outputFolder: targetFolder,
+          },
+        });
+        setBatchResult(result);
+      } catch (err: any) {
+        console.error('Batch processing encountered error:', err);
+        setBatchProgress((prev) =>
+          prev
+            ? {
+                ...prev,
+                status: 'error',
+                errorMessage: err.message || 'Batch execution failed',
+              }
+            : null
+        );
+      } finally {
+        setIsProcessing(false);
+      }
+    } else {
+      // Web browser workflow (GitHub Pages / pure client)
+      setIsProcessing(true);
+      setBatchResult(null);
+      isCancelledRef.current = false;
+      setBatchProgress({
+        currentIndex: 0,
+        totalImages: items.length,
+        currentFileName: items[0].fileName,
+        progressPercent: 0,
+        status: 'processing',
+        outputPath: 'Downloads (ZIP Archive)',
+      });
+      setIsProgressModalOpen(true);
+
+      try {
+        const result = await processBatchWeb({
+          items,
+          aspectSettings,
+          watermarkSettings,
+          watermarkImg: watermarkImgElement,
+          exportSettings,
+          onProgress: (p) => setBatchProgress(p),
+          checkCancelled: () => isCancelledRef.current,
+        });
+        setBatchResult(result);
+      } catch (err: any) {
+        console.error('Web batch processing error:', err);
+        setBatchProgress((prev) =>
+          prev
+            ? {
+                ...prev,
+                status: 'error',
+                errorMessage: err.message || 'Batch execution failed',
+              }
+            : null
+        );
+      } finally {
+        setIsProcessing(false);
+      }
     }
   };
 
   const handleCancelBatch = async () => {
     if (window.electronAPI?.cancelBatch) {
       await window.electronAPI.cancelBatch();
+    } else {
+      isCancelledRef.current = true;
     }
   };
 

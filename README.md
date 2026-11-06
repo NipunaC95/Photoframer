@@ -115,18 +115,30 @@ npm run test:pipeline
 
 ### 3. Run Development Server
 ```bash
-# Launches Vite dev server and spawns Electron with hot-reloading
+# Desktop (Electron + Vite):
 npm run dev
+
+# Pure Web (in your browser):
+npm run dev:web
 ```
 
-### 4. Build for Production
+### 4. Build for Production & Web
 ```bash
-# Builds renderer (dist/renderer) and Electron main/preload (dist/main, dist/preload)
+# Builds desktop package (renderer + Electron main/preload)
 npm run build
 
-# Launch the production bundle with Electron
-npm start
+# Builds static web app for GitHub Pages (dist/renderer)
+npm run build:web
 ```
+
+### 5. Deploy to GitHub Pages
+Photoframer includes an automated GitHub Actions deployment workflow in `.github/workflows/deploy.yml`.
+
+To deploy:
+1. Push your repository to GitHub.
+2. In your repository on GitHub, go to **Settings** → **Pages**.
+3. Under **Build and deployment** → **Source**, select **GitHub Actions**.
+4. Every push to the `main` branch will automatically build and publish Photoframer to `https://<username>.github.io/<repo>/`.
 
 ---
 

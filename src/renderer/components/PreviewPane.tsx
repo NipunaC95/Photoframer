@@ -198,8 +198,14 @@ export const PreviewPane: React.FC<PreviewPaneProps> = ({
     setIsImageLoading(true);
     const img = new Image();
 
-    // Use app-img://image?path= with encodeURIComponent to safely transport full local paths
-    const safeSrc = `app-img://image?path=${encodeURIComponent(selectedItem.filePath)}`;
+    const hasElectron = typeof window !== 'undefined' && !!(window as any).electronAPI;
+    const isBlobOrData = selectedItem.thumbnailUrl?.startsWith('blob:') || selectedItem.thumbnailUrl?.startsWith('data:');
+
+    // Use app-img://image?path= with encodeURIComponent in Electron, or direct thumbnailUrl / blob in Web
+    const safeSrc = !hasElectron || isBlobOrData
+      ? (selectedItem.thumbnailUrl || selectedItem.filePath)
+      : `app-img://image?path=${encodeURIComponent(selectedItem.filePath)}`;
+
     img.src = safeSrc;
 
     img.onload = () => {
@@ -209,10 +215,11 @@ export const PreviewPane: React.FC<PreviewPaneProps> = ({
 
     img.onerror = () => {
       // Fallback: If custom protocol fails, try thumbnail
-      if (selectedItem.thumbnailUrl) {
+      if (selectedItem.thumbnailUrl && img.src !== selectedItem.thumbnailUrl) {
         img.src = selectedItem.thumbnailUrl;
+      } else {
+        setIsImageLoading(false);
       }
-      setIsImageLoading(false);
     };
 
     return () => {

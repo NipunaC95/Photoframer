@@ -16,7 +16,7 @@ interface SourceListProps {
   onSelectItem: (item: SourceImageItem) => void;
   onAddFiles: () => void;
   onAddFolder: () => void;
-  onDropFiles: (paths: string[]) => void;
+  onDropFiles: (paths: string[], files?: File[]) => void;
   onRemoveItem: (id: string) => void;
   onClearAll: () => void;
 }
@@ -63,17 +63,17 @@ export const SourceList: React.FC<SourceListProps> = ({
 
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       const paths: string[] = [];
+      const fileList: File[] = [];
       for (let i = 0; i < e.dataTransfer.files.length; i++) {
         const file = e.dataTransfer.files[i];
+        fileList.push(file);
         // Electron webUtils or path property
         const filePath = (file as any).path || (window as any).electronAPI?.webUtils?.getPathForFile?.(file);
         if (filePath) {
           paths.push(filePath);
         }
       }
-      if (paths.length > 0) {
-        onDropFiles(paths);
-      }
+      onDropFiles(paths, fileList);
     }
   };
 

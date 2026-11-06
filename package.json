@@ -7,6 +7,8 @@
   "main": "dist/main/main.js",
   "scripts": {
     "dev": "concurrently -k \"vite\" \"node scripts/dev-runner.js\"",
+    "dev:web": "vite",
+    "build:web": "vite build",
     "build:renderer": "vite build",
     "build:main": "vite build --config vite.config.main.ts",
     "build": "npm run build:renderer && npm run build:main",
@@ -20,6 +22,8 @@
     "start": "electron . --no-sandbox"
   },
   "dependencies": {
+    "@types/jszip": "^3.4.0",
+    "jszip": "^3.10.2",
     "lucide-react": "^0.453.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

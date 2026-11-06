@@ -13,6 +13,8 @@ export const ExportSettingsControl: React.FC<ExportSettingsControlProps> = ({
   onChange,
   onSelectFolder,
 }) => {
+  const isElectron = typeof window !== 'undefined' && !!(window as any).electronAPI;
+
   return (
     <div className="space-y-4">
       <div className="flex items-center space-x-2 text-xs font-semibold tracking-tight text-[var(--text-primary)]">
@@ -27,20 +29,28 @@ export const ExportSettingsControl: React.FC<ExportSettingsControlProps> = ({
             <HardDrive className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
             <span>Output Directory</span>
           </span>
-          <button
-            onClick={onSelectFolder}
-            className="flex items-center space-x-1 text-[var(--text-primary)] hover:opacity-80 font-medium transition-opacity text-xs"
-          >
-            <FolderOpen className="w-3.5 h-3.5" />
-            <span>Browse</span>
-          </button>
+          {isElectron ? (
+            <button
+              onClick={onSelectFolder}
+              className="flex items-center space-x-1 text-[var(--text-primary)] hover:opacity-80 font-medium transition-opacity text-xs"
+            >
+              <FolderOpen className="w-3.5 h-3.5" />
+              <span>Browse</span>
+            </button>
+          ) : (
+            <span className="text-[10px] text-[var(--peak)] font-mono px-2 py-0.5 rounded bg-[var(--chip-surface)] border border-[var(--border-subtle)]">
+              ZIP Download
+            </span>
+          )}
         </div>
 
         <div className="px-3 py-1.5 rounded-lg bg-[var(--chip-surface)] border border-[var(--border-subtle)] text-xs font-mono text-[var(--text-primary)] truncate">
-          {settings.outputFolder || 'Default: [Source Folder]/Exported'}
+          {settings.outputFolder || (isElectron ? 'Default: [Source Folder]/Exported' : 'Downloads (photoframer-batch.zip)')}
         </div>
         <p className="text-[10px] text-[var(--text-muted)] leading-relaxed font-sans">
-          Exports are generated non-destructively; original files remain intact and untouched.
+          {isElectron
+            ? 'Exports are generated non-destructively; original files remain intact and untouched.'
+            : 'Images are processed client-side in your browser and automatically bundled into a high-speed .ZIP archive.'}
         </p>
       </div>
 
