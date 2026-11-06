@@ -1,7 +1,7 @@
 {
   "name": "photoframer",
   "version": "1.0.0",
-  "description": "Photoframer — Antigravity-styled Batch Image Aspect Ratio Padding & Watermark Studio",
+  "description": "Photoframer — Antigravity-styled Batch Image Aspect Ratio Padding & Watermark",
   "author": "Antigravity Principal Engineering",
   "license": "MIT",
   "main": "dist/main/main.js",
@@ -60,6 +60,7 @@
       "**/node_modules/@img/**/*"
     ],
     "mac": {
+      "icon": "build/icon.icns",
       "target": [
         "dmg",
         "zip"
@@ -68,6 +69,7 @@
       "gatekeeperAssess": false
     },
     "win": {
+      "icon": "build/icon.ico",
       "target": [
         "nsis",
         "portable"

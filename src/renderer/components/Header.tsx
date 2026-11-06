@@ -1,5 +1,6 @@
 import React from 'react';
-import { Layers, Play, Sun, Moon, FolderCheck, Loader2 } from 'lucide-react';
+import { Play, Sun, Moon, FolderCheck, Loader2 } from 'lucide-react';
+import appIcon from '../assets/icon.png';
 
 interface HeaderProps {
   itemCount: number;
@@ -22,16 +23,13 @@ export const Header: React.FC<HeaderProps> = ({
     <header className="h-14 border-b border-[var(--border-subtle)] bg-[var(--bg-panel)] flex items-center justify-between px-5 z-20 select-none backdrop-blur-md">
       {/* Brand & Title */}
       <div className="flex items-center space-x-3">
-        <div className="w-8 h-8 rounded-lg bg-[var(--brand-accent)] text-[var(--bg-base)] flex items-center justify-center font-bold shadow-sm">
-          <Layers className="w-4 h-4 stroke-[2.2]" />
+        <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center shadow-sm border border-[var(--border-subtle)] bg-[#0d0f12]">
+          <img src={appIcon} alt="Photoframer" className="w-full h-full object-contain" />
         </div>
         <div className="flex items-baseline space-x-2">
           <h1 className="text-sm font-semibold tracking-tight text-[var(--text-primary)]">
             Photoframer
           </h1>
-          <span className="text-[10px] font-mono tracking-widest uppercase px-1.5 py-0.5 rounded-full bg-[var(--chip-surface)] text-[var(--text-secondary)] border border-[var(--border-subtle)]">
-            Studio
-          </span>
         </div>
       </div>
 

@@ -64,13 +64,29 @@ protocol.registerSchemesAsPrivileged([
 let mainWindow: BrowserWindow | null = null;
 let isProcessingCancelled = false;
 
+function getAppIconPath(): string | undefined {
+  const possiblePaths = [
+    path.join(__dirname, '../../build/icon.png'),
+    path.join(__dirname, '../icon.png'),
+    path.join(__dirname, 'icon.png'),
+    path.join(process.resourcesPath || '', 'build/icon.png'),
+    path.join(process.resourcesPath || '', 'icon.png'),
+  ];
+  for (const p of possiblePaths) {
+    if (fsSync.existsSync(p)) return p;
+  }
+  return undefined;
+}
+
 function createWindow() {
+  const iconPath = getAppIconPath();
   mainWindow = new BrowserWindow({
     width: 1360,
     height: 880,
     minWidth: 1040,
     minHeight: 700,
     backgroundColor: '#0d0f12',
+    icon: iconPath,
     show: true, // Show immediately
     webPreferences: {
       nodeIntegration: false,
@@ -203,6 +219,16 @@ async function scanDirectoryForImages(dirPath: string): Promise<string[]> {
 // App lifecycle
 app.whenReady().then(() => {
   logDebug('app.whenReady reached');
+  if (process.platform === 'darwin' && app.dock) {
+    const dockIcon = getAppIconPath();
+    if (dockIcon) {
+      try {
+        app.dock.setIcon(dockIcon);
+      } catch (e) {
+        logDebug(`Failed to set dock icon: ${e}`);
+      }
+    }
+  }
   registerProtocolHandler();
   createWindow();
   logDebug('createWindow called');
