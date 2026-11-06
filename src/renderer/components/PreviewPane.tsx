@@ -13,6 +13,7 @@ import {
   PanelLeftOpen,
   PanelRightClose,
   PanelRightOpen,
+  Hand,
 } from 'lucide-react';
 import { SourceImageItem, AspectSettings, WatermarkSettings, CanvasDimensions } from '../types';
 import { renderPreviewToCanvas } from '../utils/canvasRenderer';
@@ -52,6 +53,17 @@ export const PreviewPane: React.FC<PreviewPaneProps> = ({
     height: 0,
   });
 
+  // Pan / Hand tool state (Space + mouse drag)
+  const [isSpacePressed, setIsSpacePressed] = useState<boolean>(false);
+  const [isDragging, setIsDragging] = useState<boolean>(false);
+  const [panOffset, setPanOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const dragStartRef = useRef<{ mouseX: number; mouseY: number; panX: number; panY: number }>({
+    mouseX: 0,
+    mouseY: 0,
+    panX: 0,
+    panY: 0,
+  });
+
   // Track preview container dimensions dynamically with ResizeObserver
   useEffect(() => {
     const container = containerRef.current;
@@ -78,10 +90,102 @@ export const PreviewPane: React.FC<PreviewPaneProps> = ({
     return () => observer.disconnect();
   }, []);
 
-  // Reset zoom to 100% Fit when photo selection changes
+  // Reset zoom & pan when photo selection changes
   useEffect(() => {
     setZoomLevel(1);
+    setPanOffset({ x: 0, y: 0 });
   }, [selectedItem?.id]);
+
+  // Space key listener for Hand tool (holding Space + mouse drag to move image)
+  useEffect(() => {
+    const isTyping = (el: Element | null) => {
+      return (
+        el &&
+        (el.tagName === 'INPUT' ||
+          el.tagName === 'TEXTAREA' ||
+          el.tagName === 'SELECT' ||
+          (el as HTMLElement).isContentEditable)
+      );
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.code === 'Space' || e.key === ' ') {
+        if (isTyping(document.activeElement)) return;
+        e.preventDefault();
+        setIsSpacePressed(true);
+      }
+    };
+
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.code === 'Space' || e.key === ' ') {
+        setIsSpacePressed(false);
+        setIsDragging(false);
+      }
+    };
+
+    const handleBlur = () => {
+      setIsSpacePressed(false);
+      setIsDragging(false);
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+    window.addEventListener('blur', handleBlur);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+      window.removeEventListener('blur', handleBlur);
+    };
+  }, []);
+
+  // Window-level mouse move and mouse up for seamless pan dragging
+  useEffect(() => {
+    if (!isDragging) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      e.preventDefault();
+      const dx = e.clientX - dragStartRef.current.mouseX;
+      const dy = e.clientY - dragStartRef.current.mouseY;
+      setPanOffset({
+        x: dragStartRef.current.panX + dx,
+        y: dragStartRef.current.panY + dy,
+      });
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging]);
+
+  // Handle mouse down on preview container
+  const handleMouseDown = (e: React.MouseEvent) => {
+    // Left-click while space is pressed OR middle mouse click (button === 1)
+    if ((isSpacePressed && e.button === 0) || e.button === 1) {
+      e.preventDefault();
+      setIsDragging(true);
+      dragStartRef.current = {
+        mouseX: e.clientX,
+        mouseY: e.clientY,
+        panX: panOffset.x,
+        panY: panOffset.y,
+      };
+    }
+  };
+
+  // Reset zoom & pan back to center
+  const handleResetFit = () => {
+    setZoomLevel(1);
+    setPanOffset({ x: 0, y: 0 });
+  };
 
   // Load the active source image into an HTMLImageElement
   useEffect(() => {
@@ -244,6 +348,8 @@ export const PreviewPane: React.FC<PreviewPaneProps> = ({
     }
   };
 
+  const isPanned = panOffset.x !== 0 || panOffset.y !== 0;
+
   return (
     <main className="flex-1 h-full bg-[var(--bg-base)] flex flex-col relative overflow-hidden select-none min-w-0 min-h-0">
       {/* Top Preview Status Bar */}
@@ -296,6 +402,14 @@ export const PreviewPane: React.FC<PreviewPaneProps> = ({
               {paddingInfo.type} ({paddingInfo.amount})
             </span>
           )}
+
+          {/* Hand Tool active pill */}
+          {isSpacePressed && (
+            <span className="inline-flex items-center space-x-1 text-[9px] font-mono uppercase px-2 py-0.5 rounded-full bg-[var(--peak)]/15 text-[var(--peak)] border border-[var(--peak)]/30 animate-pulse">
+              <Hand className="w-2.5 h-2.5" />
+              <span>Pan Drag</span>
+            </span>
+          )}
         </div>
 
         {/* View Controls */}
@@ -326,7 +440,7 @@ export const PreviewPane: React.FC<PreviewPaneProps> = ({
             </button>
           )}
 
-          {/* Zoom Group */}
+          {/* Zoom & Pan Group */}
           <div className="flex items-center rounded-lg bg-[var(--chip-surface)] border border-[var(--border-subtle)] p-0.5">
             <button
               onClick={() => setZoomLevel((z) => Math.max(0.25, parseFloat((z - 0.25).toFixed(2))))}
@@ -336,8 +450,8 @@ export const PreviewPane: React.FC<PreviewPaneProps> = ({
               <ZoomOut className="w-3.5 h-3.5" />
             </button>
             <button
-              onClick={() => setZoomLevel(1)}
-              title="Click to reset fit (100%)"
+              onClick={handleResetFit}
+              title="Click to reset fit & center (100%)"
               className="text-[11px] font-mono tabular-nums text-[var(--text-muted)] hover:text-[var(--text-primary)] px-1 sm:px-1.5 transition-colors"
             >
               {Math.round(zoomLevel * 100)}%
@@ -350,9 +464,13 @@ export const PreviewPane: React.FC<PreviewPaneProps> = ({
               <ZoomIn className="w-3.5 h-3.5" />
             </button>
             <button
-              onClick={() => setZoomLevel(1)}
-              title="Fit to viewport"
-              className="p-1 rounded hover:bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors ml-0.5 border-l border-[var(--border-subtle)] pl-1"
+              onClick={handleResetFit}
+              title={isPanned ? "Reset pan & fit to viewport (or double-click canvas)" : "Fit to viewport (Double-click canvas)"}
+              className={`p-1 rounded hover:bg-[var(--bg-elevated)] transition-colors ml-0.5 border-l border-[var(--border-subtle)] pl-1 ${
+                isPanned || zoomLevel !== 1
+                  ? 'text-[var(--peak)]'
+                  : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+              }`}
             >
               <Maximize className="w-3 h-3" />
             </button>
@@ -400,16 +518,27 @@ export const PreviewPane: React.FC<PreviewPaneProps> = ({
       <div
         ref={containerRef}
         onWheel={handleWheel}
-        className="flex-1 w-full h-full p-3 sm:p-4 flex items-center justify-center overflow-auto checkerboard-pattern relative min-w-0 min-h-0"
+        onMouseDown={handleMouseDown}
+        onDoubleClick={handleResetFit}
+        className={`flex-1 w-full h-full p-3 sm:p-4 flex items-center justify-center overflow-hidden checkerboard-pattern relative min-w-0 min-h-0 select-none ${
+          isDragging
+            ? 'cursor-grabbing'
+            : isSpacePressed
+            ? 'cursor-grab'
+            : 'cursor-default'
+        }`}
       >
         {selectedItem ? (
           <div
             style={{
               width: fittedDimensions ? `${fittedDimensions.displayWidth}px` : 'auto',
               height: fittedDimensions ? `${fittedDimensions.displayHeight}px` : 'auto',
-              transition: 'width 0.12s cubic-bezier(0.16, 1, 0.3, 1), height 0.12s cubic-bezier(0.16, 1, 0.3, 1)',
+              transform: `translate3d(${panOffset.x}px, ${panOffset.y}px, 0)`,
+              transition: isDragging
+                ? 'none'
+                : 'width 0.12s cubic-bezier(0.16, 1, 0.3, 1), height 0.12s cubic-bezier(0.16, 1, 0.3, 1)',
             }}
-            className="flex items-center justify-center relative shadow-patensify-xl rounded-lg overflow-hidden border border-white/10 dark:border-white/10 shrink-0"
+            className="flex items-center justify-center relative shadow-patensify-xl rounded-lg overflow-hidden border border-white/10 dark:border-white/10 shrink-0 pointer-events-auto"
           >
             <canvas
               ref={canvasRef}
@@ -446,7 +575,7 @@ export const PreviewPane: React.FC<PreviewPaneProps> = ({
 
       {/* Floating Canvas Meta Badge */}
       {dimensions && selectedItem && (
-        <div className="absolute bottom-4 left-4 bg-[var(--bg-panel)]/85 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-[var(--border-subtle)] text-[11px] font-mono tabular-nums flex items-center space-x-2.5 sm:space-x-3 text-[var(--text-secondary)] shadow-patensify-md pointer-events-none max-w-[calc(100%-2rem)] truncate">
+        <div className="absolute bottom-4 left-4 bg-[var(--bg-panel)]/85 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-[var(--border-subtle)] text-[11px] font-mono tabular-nums flex items-center space-x-2.5 sm:space-x-3 text-[var(--text-secondary)] shadow-patensify-md max-w-[calc(100%-2rem)] truncate">
           <div className="flex items-center space-x-1.5 shrink-0">
             <span className="w-1.5 h-1.5 rounded-full bg-[var(--peak)]"></span>
             <span className="text-[var(--text-muted)]">Target:</span>
@@ -472,6 +601,18 @@ export const PreviewPane: React.FC<PreviewPaneProps> = ({
                   {watermarkSettings.anchor.replace('-', ' ')} ({watermarkSettings.sizePercent}%)
                 </span>
               </div>
+            </>
+          )}
+          {isPanned && (
+            <>
+              <span className="text-[var(--border-strong)] shrink-0">•</span>
+              <button
+                onClick={handleResetFit}
+                title="Double click canvas or click here to re-center"
+                className="text-[var(--peak)] hover:underline shrink-0 font-sans text-[11px]"
+              >
+                Reset Center
+              </button>
             </>
           )}
         </div>
