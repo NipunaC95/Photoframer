@@ -93,28 +93,36 @@ export function renderPreviewToCanvas(
   sourceImg: HTMLImageElement,
   watermarkImg: HTMLImageElement | null,
   aspectSettings: AspectSettings,
-  watermarkSettings: WatermarkSettings
+  watermarkSettings: WatermarkSettings,
+  sourceItem?: { width: number; height: number }
 ): CanvasDimensions {
-  const origW = sourceImg.naturalWidth || 800;
-  const origH = sourceImg.naturalHeight || 600;
+  const origW = sourceItem?.width || sourceImg.naturalWidth || 800;
+  const origH = sourceItem?.height || sourceImg.naturalHeight || 600;
 
   const dims = calculateClientCanvasDimensions(origW, origH, aspectSettings);
   const { canvasWidth, canvasHeight, imageTargetX, imageTargetY } = dims;
 
-  // Set internal resolution of canvas
-  canvas.width = canvasWidth;
-  canvas.height = canvasHeight;
+  // Cap internal canvas buffer dimension to 2048px for smooth 60fps rendering while maintaining high density
+  const maxRenderDim = 2048;
+  const scaleRatio = Math.min(1, maxRenderDim / Math.max(canvasWidth, canvasHeight));
+
+  canvas.width = Math.round(canvasWidth * scaleRatio);
+  canvas.height = Math.round(canvasHeight * scaleRatio);
 
   const ctx = canvas.getContext('2d');
   if (!ctx) return dims;
 
-  ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  ctx.save();
+  ctx.scale(scaleRatio, scaleRatio);
 
   // 1. Background fill
   if (aspectSettings.backgroundMode === 'blur') {
     ctx.save();
     // Use canvas CSS filter for blur
-    ctx.filter = 'blur(28px)';
+    const blurPx = Math.max(8, aspectSettings.blurSigma || 28);
+    ctx.filter = `blur(${blurPx}px)`;
     // Scale slightly by 1.08 to prevent edge-bleeding caused by canvas blur
     ctx.translate(canvasWidth / 2, canvasHeight / 2);
     ctx.scale(1.08, 1.08);
@@ -198,5 +206,6 @@ export function renderPreviewToCanvas(
     ctx.restore();
   }
 
+  ctx.restore();
   return dims;
 }

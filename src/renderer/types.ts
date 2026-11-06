@@ -5,10 +5,7 @@ import {
   SourceImageItem,
   ProcessBatchResult,
   BatchProgressPayload,
-  CanvasDimensions,
-  AspectPreset,
-  BackgroundMode,
-  WatermarkAnchor,
+  CanvasDimensions
 } from '../main/types';
 
 export * from '../main/types';

@@ -3,6 +3,7 @@ import path from 'path';
 import fs from 'fs/promises';
 import fsSync from 'fs';
 import os from 'os';
+import { pathToFileURL } from 'url';
 
 // Ensure writable cache and user data directory on Windows
 const customUserData = path.join(os.tmpdir(), 'photoframer-app-data');
@@ -153,18 +154,25 @@ function createWindow() {
 function registerProtocolHandler() {
   protocol.handle('app-img', async (request) => {
     try {
-      // Decode URL, stripping scheme
-      let urlPath = request.url.replace(/^app-img:\/\/+/, '');
-      urlPath = decodeURIComponent(urlPath);
+      let filePath = '';
+      const reqUrl = request.url;
 
-      // On Windows, handle leading slash or drive letter correctly
-      if (process.platform === 'win32' && /^[a-zA-Z]:[\\\/]/.test(urlPath)) {
-        // e.g. C:/path...
-      } else if (process.platform === 'win32' && /^\/[a-zA-Z]:[\\\/]/.test(urlPath)) {
-        urlPath = urlPath.slice(1);
+      if (reqUrl.includes('?path=')) {
+        const parsed = new URL(reqUrl);
+        filePath = decodeURIComponent(parsed.searchParams.get('path') || '');
+      } else {
+        let urlPath = reqUrl.replace(/^app-img:\/\/+/, '');
+        urlPath = decodeURIComponent(urlPath);
+        if (process.platform === 'win32' && /^\/[a-zA-Z]:[\\\/]/.test(urlPath)) {
+          urlPath = urlPath.slice(1);
+        } else if (!urlPath.startsWith('/') && process.platform !== 'win32') {
+          urlPath = '/' + urlPath;
+        }
+        filePath = urlPath;
       }
 
-      return await net.fetch(`file:///${urlPath.replace(/\\/g, '/')}`);
+      const fileUrl = pathToFileURL(filePath).href;
+      return await net.fetch(fileUrl);
     } catch (err) {
       console.error('Failed to handle app-img protocol:', err);
       return new Response('Not found', { status: 404 });
