@@ -34,8 +34,8 @@ const api = {
     return ipcRenderer.invoke('images:inspectPaths', paths);
   },
 
-  selectOutputFolder: (): Promise<string | null> => {
-    return ipcRenderer.invoke('dialog:selectOutputFolder');
+  selectOutputFolder: (defaultPath?: string): Promise<string | null> => {
+    return ipcRenderer.invoke('dialog:selectOutputFolder', defaultPath);
   },
 
   selectWatermark: (): Promise<{

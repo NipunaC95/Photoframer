@@ -17,7 +17,7 @@ export interface IElectronAPI {
   openFiles: () => Promise<SourceImageItem[]>;
   openFolder: () => Promise<SourceImageItem[]>;
   inspectPaths: (paths: string[]) => Promise<SourceImageItem[]>;
-  selectOutputFolder: () => Promise<string | null>;
+  selectOutputFolder: (defaultPath?: string) => Promise<string | null>;
   selectWatermark: () => Promise<{
     filePath: string;
     thumbnailUrl: string;

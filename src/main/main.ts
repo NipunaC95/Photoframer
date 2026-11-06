@@ -319,10 +319,11 @@ ipcMain.handle('images:inspectPaths', async (_, filePaths: string[]) => {
 });
 
 // 4. Select custom output folder
-ipcMain.handle('dialog:selectOutputFolder', async () => {
+ipcMain.handle('dialog:selectOutputFolder', async (_event, defaultPath?: string) => {
   if (!mainWindow) return null;
   const result = await dialog.showOpenDialog(mainWindow, {
     title: 'Select Export Directory',
+    defaultPath: defaultPath && typeof defaultPath === 'string' ? defaultPath : undefined,
     properties: ['openDirectory', 'createDirectory'],
   });
 

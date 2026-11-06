@@ -97,6 +97,48 @@ export const App: React.FC = () => {
     }
   }, []);
 
+  // Keyboard navigation for image queue (Up / Down / Left / Right arrow keys)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Do not intercept if user is typing in an input field or modal
+      const activeEl = document.activeElement;
+      if (
+        activeEl &&
+        (activeEl.tagName === 'INPUT' ||
+          activeEl.tagName === 'TEXTAREA' ||
+          activeEl.tagName === 'SELECT' ||
+          (activeEl as HTMLElement).isContentEditable)
+      ) {
+        return;
+      }
+
+      if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+        if (items.length === 0) return;
+        e.preventDefault();
+        setSelectedItem((curr) => {
+          if (!curr) return items[0];
+          const idx = items.findIndex((it) => it.id === curr.id);
+          if (idx === -1) return items[0];
+          const nextIdx = Math.min(items.length - 1, idx + 1);
+          return items[nextIdx];
+        });
+      } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+        if (items.length === 0) return;
+        e.preventDefault();
+        setSelectedItem((curr) => {
+          if (!curr) return items[0];
+          const idx = items.findIndex((it) => it.id === curr.id);
+          if (idx === -1) return items[0];
+          const prevIdx = Math.max(0, idx - 1);
+          return items[prevIdx];
+        });
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [items]);
+
   // Sync watermark HTMLImageElement whenever watermark path changes
   useEffect(() => {
     if (!watermarkSettings.filePath) {
@@ -244,9 +286,32 @@ export const App: React.FC = () => {
     }
   };
 
-  // Start batch processing
+  // Start batch processing (prompts for export destination directory first)
   const handleStartBatch = async () => {
     if (items.length === 0 || isProcessing) return;
+
+    // Ask user for destination folder before proceeding
+    let targetFolder = exportSettings.outputFolder;
+    if (window.electronAPI?.selectOutputFolder) {
+      let initialDir = targetFolder;
+      if (!initialDir) {
+        const samplePath = selectedItem?.filePath || items[0]?.filePath;
+        if (samplePath) {
+          const sep = samplePath.includes('/') ? '/' : '\\';
+          initialDir = samplePath.substring(0, samplePath.lastIndexOf(sep));
+        }
+      }
+
+      const chosen = await window.electronAPI.selectOutputFolder(initialDir || undefined);
+      if (!chosen) {
+        // User cancelled folder picker; abort export
+        return;
+      }
+      targetFolder = chosen;
+      setExportSettings((prev) => ({ ...prev, outputFolder: chosen }));
+    }
+
+    if (!targetFolder) return;
 
     setIsProcessing(true);
     setBatchResult(null);
@@ -264,7 +329,10 @@ export const App: React.FC = () => {
         items,
         aspectSettings,
         watermarkSettings,
-        exportSettings,
+        exportSettings: {
+          ...exportSettings,
+          outputFolder: targetFolder,
+        },
       });
       setBatchResult(result);
     } catch (err: any) {

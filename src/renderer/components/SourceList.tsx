@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   FolderPlus,
   FilePlus,
@@ -35,6 +35,16 @@ export const SourceList: React.FC<SourceListProps> = ({
 }) => {
   const [isDragOver, setIsDragOver] = useState(false);
   const dropRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll the active queue item into view when selected via keyboard (Up/Down) or click
+  useEffect(() => {
+    if (selectedItem?.id) {
+      const el = document.getElementById(`source-item-${selectedItem.id}`);
+      if (el) {
+        el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      }
+    }
+  }, [selectedItem?.id]);
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -113,6 +123,14 @@ export const SourceList: React.FC<SourceListProps> = ({
             <span className="text-[11px] font-mono tabular-nums text-[var(--text-muted)]">
               ({items.length})
             </span>
+            {items.length > 1 && (
+              <span
+                className="text-[9px] font-mono text-[var(--text-muted)] bg-[var(--chip-surface)] border border-[var(--border-subtle)] px-1.5 py-0.5 rounded tracking-tighter"
+                title="Use Up / Down arrow keys to cycle photos"
+              >
+                ↑↓
+              </span>
+            )}
           </div>
 
           {items.length > 0 && (
@@ -171,10 +189,11 @@ export const SourceList: React.FC<SourceListProps> = ({
             return (
               <div
                 key={item.id}
+                id={`source-item-${item.id}`}
                 onClick={() => onSelectItem(item)}
                 className={`group relative flex items-center p-2 rounded-xl cursor-pointer transition-all border ${
                   isSelected
-                    ? 'bg-white/[0.08] dark:bg-white/[0.08] border-white/20 shadow-sm'
+                    ? 'bg-white/[0.08] dark:bg-white/[0.08] border-white/20 shadow-sm ring-1 ring-white/10'
                     : 'bg-[var(--bg-card)]/60 hover:bg-[var(--bg-card)] border-[var(--border-subtle)] hover:border-[var(--border-strong)]'
                 }`}
               >
