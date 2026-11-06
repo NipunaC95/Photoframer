@@ -154,3 +154,4 @@ export function selectWatermarkWeb(): Promise<{
     input.click();
   });
 }
+
