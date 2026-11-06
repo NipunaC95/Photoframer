@@ -3,6 +3,7 @@ node_modules/
 
 # Production builds
 dist/
+release/
 
 # Test exports & logs
 sample-assets/Exported-Test/
