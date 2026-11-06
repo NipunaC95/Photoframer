@@ -92,8 +92,8 @@ async function createSampleAssets() {
       <rect x="10" y="10" width="140" height="140" rx="28" fill="#0891b2" />
       <path d="M40 110 L80 40 L120 110 Z" fill="#ffffff" />
       <circle cx="80" cy="85" r="14" fill="#0891b2" />
-      <text x="180" y="85" font-family="sans-serif" font-size="52" font-weight="900" fill="#ffffff" letter-spacing="2">
-        ANTIGRAVITY
+      <text x="180" y="85" font-family="sans-serif" font-size="46" font-weight="900" fill="#ffffff" letter-spacing="2">
+        PHOTOFRAMER
       </text>
       <text x="182" y="125" font-family="sans-serif" font-size="24" font-weight="600" fill="#22d3ee" letter-spacing="4">
         STUDIO PRO

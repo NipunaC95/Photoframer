@@ -1,6 +1,6 @@
 # Photoframer ✦
 
-> Modern, non-destructive batch image aspect ratio padding and transparent watermark studio for desktop, engineered with Electron, TypeScript, Sharp, React, and Google Antigravity design paradigms.
+> Modern, non-destructive batch image aspect ratio padding and transparent watermark studio for desktop, engineered with Electron, TypeScript, Sharp, and React.
 
 ---
 
@@ -10,7 +10,7 @@ Photoframer is designed for creative media workflows, photographers, and social 
 
 ```mermaid
 flowchart TD
-    subgraph UI["Renderer Process (React + Antigravity Design System)"]
+    subgraph UI["Renderer Process (React + Tailwind CSS)"]
         A[File / Folder Dropzone] --> B[Source Queue & Thumbnail Badges]
         B --> C[Real-Time 60 FPS HTML5 Canvas Viewport]
         D[Aspect Ratio Presets: 1:1, 4:5, 9:16, 16:9, Custom] --> C
@@ -44,7 +44,7 @@ flowchart TD
    - `contextIsolation: true`
    - Custom `app-img://` privileged protocol for local asset display without disabling web security.
    - Strict Content Security Policy (CSP) headers applied to all sessions.
-5. **Fluid Antigravity UX:**
+5. **Fluid Modern UX:**
    - Multi-tier surface elevations (`--bg-base`, `--bg-panel`, `--bg-card`, `--bg-elevated`).
    - Tactile 9-point anchor matrix with cyan glow indicators.
    - Real-time 60 FPS HTML5 Canvas preview for instant visual feedback during slider adjustment.
@@ -55,7 +55,7 @@ flowchart TD
 ## 📁 Project Structure
 
 ```
-aspect-craft/
+photoframer/
 ├── src/
 │   ├── main/
 │   │   ├── main.ts               # Electron window lifecycle, protocol handlers, IPC listeners
@@ -64,21 +64,21 @@ aspect-craft/
 │   ├── preload/
 │   │   └── preload.ts            # contextBridge typed API exposed to window.electronAPI
 │   └── renderer/
-│       ├── main.tsx              # React 18 DOM mount point
-│       ├── App.tsx               # Studio 3-column workspace & state management
-│       ├── index.css             # Tailwind CSS & Antigravity design tokens
-│       ├── types.ts              # Renderer-specific types and window interface
-│       ├── components/
-│       │   ├── Header.tsx        # Top status bar, theme switch, batch action trigger
-│       │   ├── SourceList.tsx    # Drag-and-drop zone, loaded list with orientation badges
-│       │   ├── AspectControl.tsx # Presets (1:1, 4:5, 9:16, 16:9, Custom) & Fill selector
-│       │   ├── WatermarkControl.tsx # 9-point grid, scale, opacity, margin controls
-│       │   ├── ExportSettingsControl.tsx # Format, compression quality, folder picker
-│       │   ├── PreviewPane.tsx   # Interactive canvas viewport with zoom & comparison
-│       │   └── BatchProgressModal.tsx # Progress bar, stats counter, "Open Folder"
-│       └── utils/
-│           ├── canvasRenderer.ts # Client-side 60 FPS preview renderer matching Sharp
-│           └── formatters.ts     # Byte formatters, dimension formatters
+│   │   ├── main.tsx              # React 18 DOM mount point
+│   │   ├── App.tsx               # Studio 3-column workspace & state management
+│   │   ├── index.css             # Tailwind CSS & UI design tokens
+│   │   ├── types.ts              # Renderer-specific types and window interface
+│   │   ├── components/
+│   │   │   ├── Header.tsx        # Top status bar, theme switch, batch action trigger
+│   │   │   ├── SourceList.tsx    # Drag-and-drop zone, loaded list with orientation badges
+│   │   │   ├── AspectControl.tsx # Presets (1:1, 4:5, 9:16, 16:9, Custom) & Fill selector
+│   │   │   ├── WatermarkControl.tsx # 9-point grid, scale, opacity, margin controls
+│   │   │   ├── ExportSettingsControl.tsx # Format, compression quality, folder picker
+│   │   │   ├── PreviewPane.tsx   # Interactive canvas viewport with zoom & comparison
+│   │   │   └── BatchProgressModal.tsx # Progress bar, stats counter, "Open Folder"
+│   │   └── utils/
+│   │       ├── canvasRenderer.ts # Client-side 60 FPS preview renderer matching Sharp
+│   │       └── formatters.ts     # Byte formatters, dimension formatters
 ├── sample-assets/                # Bundled test images (landscape, portrait, square, logo)
 ├── scripts/
 │   ├── dev-runner.js             # Development coordinator (Vite + Electron)
@@ -88,7 +88,7 @@ aspect-craft/
 ├── tsconfig.json
 ├── vite.config.ts                # Vite renderer bundler
 ├── vite.config.main.ts           # Vite Node/Electron CJS bundler for main & preload
-└── tailwind.config.js            # Antigravity palette configuration
+└── tailwind.config.js            # Tailwind theme palette configuration
 ```
 
 ---
@@ -98,7 +98,7 @@ aspect-craft/
 ### 1. Installation
 ```bash
 # Clone or navigate to the project directory
-cd C:\Users\Nipuna\.gemini\antigravity\scratch\aspect-craft
+cd Photoframer
 
 # Install dependencies (Node 18+ required)
 npm install
@@ -130,9 +130,9 @@ npm start
 
 ---
 
-## 🎨 Antigravity Design System Implementation
+## 🎨 UI Design System & Aesthetic
 
-The application adheres to Google Antigravity design guidelines:
+The application adheres to modern, sleek studio design principles:
 - **Surface Depth Hierarchy:** Elevated obsidian (`#0a0c0f`) base, dark slate (`#111419`) panels, card surfaces (`#171b22`), and flyouts (`#1e232d`) with delicate `1px rgba(255,255,255,0.08)` borders.
 - **Micro-Interactions:** Smooth glow animations on active states, hover lift on preset cards, tactile feedback on slider knobs, and animated drag-over zones.
 - **Theme Adaptability:** Full Dark and Light mode support dynamically switching CSS custom properties across all components.
@@ -141,4 +141,4 @@ The application adheres to Google Antigravity design guidelines:
 ---
 
 ## 📄 License
-MIT © Antigravity Engineering
+MIT © Nipuna

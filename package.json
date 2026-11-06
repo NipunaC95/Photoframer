@@ -1,8 +1,8 @@
 {
   "name": "photoframer",
   "version": "1.0.0",
-  "description": "Photoframer — Antigravity-styled Batch Image Aspect Ratio Padding & Watermark",
-  "author": "Antigravity Principal Engineering",
+  "description": "Photoframer — Batch Image Aspect Ratio Padding & Watermark Studio",
+  "author": "Nipuna",
   "license": "MIT",
   "main": "dist/main/main.js",
   "scripts": {
