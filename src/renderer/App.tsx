@@ -61,6 +61,10 @@ export const App: React.FC = () => {
   // Right sidebar active tab
   const [activeTab, setActiveTab] = useState<'aspect' | 'watermark' | 'export'>('aspect');
 
+  // Sidebar collapse toggles for maximized preview
+  const [isLeftCollapsed, setIsLeftCollapsed] = useState<boolean>(false);
+  const [isRightCollapsed, setIsRightCollapsed] = useState<boolean>(false);
+
   // Batch process state
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [isProgressModalOpen, setIsProgressModalOpen] = useState<boolean>(false);

@@ -67,6 +67,7 @@ export function drawCoverImage(
   targetWidth: number,
   targetHeight: number
 ) {
+  if (!img.complete || img.naturalWidth <= 0 || img.naturalHeight <= 0) return;
   const imgRatio = img.naturalWidth / img.naturalHeight;
   const targetRatio = targetWidth / targetHeight;
 
@@ -112,6 +113,10 @@ export function renderPreviewToCanvas(
   const ctx = canvas.getContext('2d');
   if (!ctx) return dims;
 
+  // Enable high-quality smoothing for sharp rendering
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   ctx.save();
@@ -141,7 +146,9 @@ export function renderPreviewToCanvas(
   }
 
   // 2. Centered original image
-  ctx.drawImage(sourceImg, imageTargetX, imageTargetY, origW, origH);
+  if (sourceImg.complete && sourceImg.naturalWidth > 0 && sourceImg.naturalHeight > 0) {
+    ctx.drawImage(sourceImg, imageTargetX, imageTargetY, origW, origH);
+  }
 
   // 3. Watermark
   if (watermarkSettings.enabled && watermarkImg && watermarkImg.complete && watermarkImg.naturalWidth > 0) {

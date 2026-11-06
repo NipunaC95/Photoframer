@@ -100,7 +100,7 @@ export const SourceList: React.FC<SourceListProps> = ({
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
-      className={`w-80 h-full border-r border-[var(--border-subtle)] bg-[var(--bg-panel)] flex flex-col relative transition-all duration-150 ${
+      className={`w-72 shrink-0 h-full border-r border-[var(--border-subtle)] bg-[var(--bg-panel)] flex flex-col relative transition-all duration-150 ${
         isDragOver ? 'ring-1 ring-white/40 bg-neutral-900/60' : ''
       }`}
     >
