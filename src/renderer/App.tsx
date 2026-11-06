@@ -105,7 +105,7 @@ export const App: React.FC = () => {
     }
 
     const img = new Image();
-    const safeSrc = `app-img://${encodeURIComponent(watermarkSettings.filePath.replace(/\\/g, '/'))}`;
+    const safeSrc = `app-img://image?path=${encodeURIComponent(watermarkSettings.filePath)}`;
     img.src = safeSrc;
 
     img.onload = () => {
@@ -310,16 +310,18 @@ export const App: React.FC = () => {
       {/* Main Studio Workspace: 3-column Layout */}
       <div className="flex-1 flex overflow-hidden">
         {/* Left: Source Image Queue */}
-        <SourceList
-          items={items}
-          selectedItem={selectedItem}
-          onSelectItem={setSelectedItem}
-          onAddFiles={handleAddFiles}
-          onAddFolder={handleAddFolder}
-          onDropFiles={handleDropFiles}
-          onRemoveItem={handleRemoveItem}
-          onClearAll={handleClearAll}
-        />
+        {!isLeftCollapsed && (
+          <SourceList
+            items={items}
+            selectedItem={selectedItem}
+            onSelectItem={setSelectedItem}
+            onAddFiles={handleAddFiles}
+            onAddFolder={handleAddFolder}
+            onDropFiles={handleDropFiles}
+            onRemoveItem={handleRemoveItem}
+            onClearAll={handleClearAll}
+          />
+        )}
 
         {/* Center: Live Interactive Preview */}
         <PreviewPane
@@ -327,10 +329,15 @@ export const App: React.FC = () => {
           aspectSettings={aspectSettings}
           watermarkSettings={watermarkSettings}
           watermarkImg={watermarkImgElement}
+          isLeftCollapsed={isLeftCollapsed}
+          isRightCollapsed={isRightCollapsed}
+          onToggleLeft={() => setIsLeftCollapsed((v) => !v)}
+          onToggleRight={() => setIsRightCollapsed((v) => !v)}
         />
 
         {/* Right: Studio Control Inspector */}
-        <aside className="w-84 border-l border-[var(--border-subtle)] bg-[var(--bg-panel)] flex flex-col h-full z-10 shrink-0">
+        {!isRightCollapsed && (
+          <aside className="w-80 border-l border-[var(--border-subtle)] bg-[var(--bg-panel)] flex flex-col h-full z-10 shrink-0">
           {/* Inspector Navigation Tabs */}
           <div className="p-2.5 border-b border-[var(--border-subtle)] bg-[var(--bg-panel)]">
             <div className="grid grid-cols-3 gap-1 p-1 rounded-xl bg-[var(--chip-surface)] border border-[var(--border-subtle)]">
@@ -401,6 +408,7 @@ export const App: React.FC = () => {
             )}
           </div>
         </aside>
+        )}
       </div>
 
       {/* Batch Processing Overlay Modal */}
