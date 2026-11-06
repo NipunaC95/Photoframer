@@ -14,6 +14,9 @@ import {
 export * from '../main/types';
 
 export interface IElectronAPI {
+  webUtils?: {
+    getPathForFile: (file: File) => string;
+  };
   openFiles: () => Promise<SourceImageItem[]>;
   openFolder: () => Promise<SourceImageItem[]>;
   inspectPaths: (paths: string[]) => Promise<SourceImageItem[]>;

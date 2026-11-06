@@ -1,4 +1,4 @@
-import { contextBridge, ipcRenderer } from 'electron';
+import { contextBridge, ipcRenderer, webUtils } from 'electron';
 import {
   SourceImageItem,
   AspectSettings,
@@ -10,6 +10,17 @@ import {
 } from '../main/types';
 
 const api = {
+  // Drag and drop file helper for modern Electron
+  webUtils: {
+    getPathForFile: (file: File): string => {
+      try {
+        return webUtils.getPathForFile(file);
+      } catch {
+        return (file as any).path || '';
+      }
+    },
+  },
+
   // File dialogs
   openFiles: (): Promise<SourceImageItem[]> => {
     return ipcRenderer.invoke('dialog:openFiles');
