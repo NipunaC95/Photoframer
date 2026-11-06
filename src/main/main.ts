@@ -1,6 +1,38 @@
 import { app, BrowserWindow, ipcMain, dialog, shell, protocol, net } from 'electron';
 import path from 'path';
 import fs from 'fs/promises';
+import fsSync from 'fs';
+import os from 'os';
+
+// Ensure writable cache and user data directory on Windows
+const customUserData = path.join(os.tmpdir(), 'photoframer-app-data');
+try {
+  fsSync.mkdirSync(customUserData, { recursive: true });
+  app.setPath('userData', customUserData);
+} catch (e) {
+  console.error('Failed to set custom userData path:', e);
+}
+
+app.commandLine.appendSwitch('disable-gpu-cache');
+app.commandLine.appendSwitch('no-sandbox');
+
+// Log to file for diagnostics
+const logFile = path.resolve(__dirname, '../../electron-debug.log');
+function logDebug(msg: string) {
+  try {
+    fsSync.appendFileSync(logFile, `[${new Date().toISOString()}] ${msg}\n`);
+  } catch (e) {}
+}
+
+logDebug('Electron main script loaded');
+
+process.on('uncaughtException', (err) => {
+  logDebug(`UNCAUGHT EXCEPTION: ${err?.stack || err}`);
+});
+
+process.on('unhandledRejection', (reason: any) => {
+  logDebug(`UNHANDLED REJECTION: ${reason?.stack || reason}`);
+});
 import {
   inspectImageFile,
   generateThumbnail,
@@ -38,7 +70,7 @@ function createWindow() {
     minWidth: 1040,
     minHeight: 700,
     backgroundColor: '#0d0f12',
-    show: false,
+    show: true, // Show immediately
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
@@ -47,14 +79,33 @@ function createWindow() {
     },
   });
 
-  mainWindow.once('ready-to-show', () => {
+  mainWindow.on('ready-to-show', () => {
     mainWindow?.show();
+    mainWindow?.focus();
     if (process.env.TEST_MODE === '1' || process.argv.includes('--test-mode')) {
       console.log('[Electron Main] Window ready-to-show verified successfully in test mode!');
       setTimeout(() => {
         app.quit();
       }, 1000);
     }
+  });
+
+  mainWindow.webContents.on('did-finish-load', () => {
+    logDebug('mainWindow did-finish-load successfully');
+    mainWindow?.show();
+    mainWindow?.focus();
+  });
+
+  mainWindow.webContents.on('did-fail-load', (_event, errorCode, errorDescription) => {
+    logDebug(`mainWindow did-fail-load: ${errorCode} - ${errorDescription}`);
+  });
+
+  mainWindow.webContents.on('render-process-gone', (_event, details) => {
+    logDebug(`render-process-gone: ${JSON.stringify(details)}`);
+  });
+
+  mainWindow.webContents.on('console-message', (_event, level, message, line, sourceId) => {
+    logDebug(`Renderer console [${level}]: ${message} (${sourceId}:${line})`);
   });
 
   // Strict Content Security Policy
@@ -78,6 +129,7 @@ function createWindow() {
   }
 
   mainWindow.on('closed', () => {
+    logDebug('mainWindow closed event fired');
     mainWindow = null;
   });
 }
@@ -127,17 +179,22 @@ async function scanDirectoryForImages(dirPath: string): Promise<string[]> {
 
 // App lifecycle
 app.whenReady().then(() => {
+  logDebug('app.whenReady reached');
   registerProtocolHandler();
   createWindow();
+  logDebug('createWindow called');
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
     }
   });
+}).catch((err) => {
+  logDebug(`app.whenReady error: ${err?.stack || err}`);
 });
 
 app.on('window-all-closed', () => {
+  logDebug('window-all-closed fired');
   if (process.platform !== 'darwin') {
     app.quit();
   }

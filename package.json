@@ -13,7 +13,7 @@
     "test:pipeline": "node scripts/test-batch-pipeline.js",
     "generate:samples": "node scripts/generate-sample-assets.js",
     "preview": "vite preview",
-    "start": "electron ."
+    "start": "electron . --no-sandbox"
   },
   "dependencies": {
     "lucide-react": "^0.453.0",
