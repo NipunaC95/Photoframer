@@ -1,10 +1,13 @@
 @echo off
 title Photoframer Studio
 cd /d "%~dp0"
-echo Starting Photoframer Desktop Application...
-npm start
+echo ========================================================
+echo   Launching Photoframer Desktop Studio...
+echo ========================================================
+echo.
+call npm.cmd start
 if %ERRORLEVEL% NEQ 0 (
   echo.
-  echo An error occurred. Press any key to exit.
+  echo [ERROR] Application failed to launch.
   pause
 )
